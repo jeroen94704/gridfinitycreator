@@ -1,0 +1,26 @@
+version: "3.3"
+
+services:
+  cadquery:
+    build: ./
+    container_name: cadquery
+    tmpfs:
+      - /tmpfiles
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+    restart: unless-stopped
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gridfinity.rule=Host(`gridfinity.bouwens.co`)"
+      - "traefik.http.routers.gridfinity.entrypoints=websecure"
+      - "traefik.http.routers.gridfinity.service=gridfinity_service"
+      - "traefik.http.routers.gridfinity.tls.certResolver=leresolver"
+      - "traefik.http.services.gridfinity_service.loadbalancer.server.port=5000"
+
+networks:
+  proxy:
+    external: true

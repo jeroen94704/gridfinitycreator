@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% import "bootstrap4/form.html" as wtf %}
+
+{% block content %}
+
+<div class="container">
+  <div class="py-2 text-center">
+    <h2>Welcome Gridfinifans!</h2>
+    <p class="text-muted">(Yes, that is a word I made up. Yes, it's terrible. No, I don't feel guilty)</p>
+  </div>
+
+  <p class="py-2 primary lead">This page generates STL files for customizable Gridfinity components, such as the basic divider bin. You can specify grid-unit-size and
+  other parameters (such as number of compartments), and toggle options like holes magnets and/or screws, stacking lip, etc. Just fill in the parameters 
+  for one of the generators below and click the "Generate STL" button.</p>
+
+  <p class="py-2 primary lead">Feel free to let me know what you think on <a href="https://hackaday.social/@Jeroen94704">Mastodon</a> or <a href="https://discord.com/users/303964784984850433">Discord</a></p>
+
+  <p class="py-2 lead text-warning">NOTE: This is a very early alpha version. It may produce incorrect output, fail inexplicably or cease to exist at any moment.</p>
+
+  <div class="container p-2 w-75">
+    <ul class="nav nav-tabs">
+      <li class="active">
+        <button class="nav-link active" data-toggle="tab" href="#bin">Divider bin</button>
+      </li>
+      <li>
+        <button class="nav-link" data-toggle="tab" href="#lightbin">Light bin</button>
+      </li>
+      <li>
+        <button class="nav-link" data-toggle="tab" href="#solidbin">Solid bin</button>
+      </li>
+      <li>
+        <button class="nav-link" data-toggle="tab" href="#plate">Base plate</button>
+      </li>
+    </ul>
+
+    <div class="tab-content p-2 border border-top-0">
+      <div id="bin" class="tab-pane active">
+        <p class="py-2 primary">This generates a normal Gridfinity divider bin of your desired size with the extra option of compartments in both length and width directions</p>
+        <form method="post">
+          {{ binform.csrf_token() }}
+          {{ wtf.render_form_row([binform.sizeUnitsX, binform.sizeUnitsY, binform.sizeUnitsZ]) }}
+          {{ wtf.render_form_row([binform.compartmentsX, binform.compartmentsY], row_class="row row-cols-3") }}
+          {{ wtf.render_form_row([binform.addStackingLip, binform.addMagnetHoles, binform.addScrewHoles]) }}
+          {{ wtf.render_form_row([binform.addGrabCurve, binform.addLabelRidge, binform.multiLabel]) }}
+          <div class="form-row">
+            <div class="col"></div>
+            {{ wtf.render_field(binform.submit, class="col") }}
+            <div class="col"></div>
+          </div>
+        </form>
+      </div>
+      <div id="lightbin" class="tab-pane">
+        <p class="py-2 primary">This generates a light version of the normal Gridfinity bin that saves plastic and offers more room. This means magnets and/or screws are not possible</p>
+        <form method="post">
+          {{ lightform.csrf_token() }}
+          {{ wtf.render_form_row([lightform.sizeUnitsX, lightform.sizeUnitsY, lightform.sizeUnitsZ]) }}
+          {{ wtf.render_form_row([lightform.addStackingLip]) }}
+          <div class="form-row">
+            <div class="col"></div>
+            {{ wtf.render_field(lightform.submit, class="col") }}
+            <div class="col"></div>
+          </div>
+        </form>
+      </div>
+      <div id="solidbin" class="tab-pane">
+        <p class="py-2 primary">This generates a completely filled solid Gridfinity bin which can be used as a starting point for custom bins</p>
+        <form method="post">
+          {{ solidform.csrf_token() }}
+          {{ wtf.render_form_row([solidform.sizeUnitsX, solidform.sizeUnitsY, solidform.sizeUnitsZ]) }}
+          {{ wtf.render_form_row([solidform.addStackingLip, solidform.addMagnetHoles, solidform.addScrewHoles]) }}
+          <div class="form-row">
+            <div class="col"></div>
+            {{ wtf.render_field(solidform.submit, class="col") }}
+            <div class="col"></div>
+          </div>
+        </form>
+      </div>
+      <div id="plate" class="tab-pane">
+        <p class="py-2 primary">Nothing to see here (for now)</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="py-2"><strong>{{ message }}</strong></p>
+</div>
+
+{%- block footer %}
+<footer class="container">&copy;2023 Jeroen Bouwens</footer>
+{%- endblock footer %}
+
+{% endblock %}
+

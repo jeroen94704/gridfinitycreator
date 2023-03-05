@@ -128,7 +128,7 @@ class Generator:
         
         if self.settings.addStackingLip:
             result = result.edges(
-                        cq.selectors.NearestToPointSelector((self.brickSizeX/2, self.brickSizeY/2, sizeZ))
+                        cq.selectors.NearestToPointSelector((self.brickSizeX/2, self.brickSizeY/2, sizeZ*2))
                     ).chamfer(thickness-EPSILON)
             
         return result

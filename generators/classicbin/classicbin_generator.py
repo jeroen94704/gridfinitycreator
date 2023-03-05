@@ -105,7 +105,7 @@ class Generator:
         
         if self.settings.addStackingLip:
             result = result.edges(
-                        cq.selectors.NearestToPointSelector((self.brickSizeX/2, self.brickSizeY/2, sizeZ))
+                        cq.selectors.NearestToPointSelector((self.brickSizeX/2, self.brickSizeY/2, sizeZ*2))
                     ).chamfer(thickness-EPSILON)
             
         return result
@@ -184,6 +184,7 @@ class Generator:
         self.settings.sizeUnitsX = min(self.settings.sizeUnitsX, MAX_GRID_UNITS)
         self.settings.sizeUnitsY = min(self.settings.sizeUnitsY, MAX_GRID_UNITS)
         self.settings.sizeUnitsZ = min(self.settings.sizeUnitsZ, MAX_HEIGHT_UNITS)
+        self.settings.sizeUnitsZ = max(self.settings.sizeUnitsZ, MIN_HEIGHT_UNITS)
 
         # Limit the number of compartment in each direction
         self.settings.compartmentsX = min(self.settings.compartmentsX, self.settings.sizeUnitsX*MAX_COMPARTMENTS_PER_GRID_UNIT)
@@ -191,6 +192,9 @@ class Generator:
 
         # Ensure the labeltab is smaller than half the compartmentsize, or it will close off a row
         self.settings.labelRidgeWidth = min(self.compartmentSizeY/2, self.settings.labelRidgeWidth)
+
+        # Ensure the label tab is not deeper than the interior height of the bin or it will stick out 
+        self.settings.labelRidgeWidth = min(self.compartmentSizeZ, self.settings.labelRidgeWidth)
 
     def generate_model(self):
         plane = cq.Workplane("XY")

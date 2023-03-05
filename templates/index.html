@@ -19,6 +19,29 @@
 
   <div class="container p-2 w-75">
     <ul class="nav nav-tabs">
+      {% for form in forms %}
+      <li>
+        <button class="nav-link" data-toggle="tab" href="#bin">{{ form.get_title() }}</button>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="tab-content p-2 border border-top-0">
+    <div id="bin" class="tab-pane active">
+      {% for form in forms %}
+      <p class="py-2 primary">{{ form.get_description() }}</p>
+      <form method="post">
+        {{ form.csrf_token() }}
+        {% for row in form.get_rows() %}
+          {{ wtf.render_form_row(row) }}
+        {% endfor %}
+      </form>
+      {% endfor %}
+    </div>
+
+  <div class="container p-2 w-75">
+    <ul class="nav nav-tabs">
       <li class="active">
         <button class="nav-link active" data-toggle="tab" href="#bin">Divider bin</button>
       </li>

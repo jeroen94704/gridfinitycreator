@@ -10,9 +10,9 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import logging
 import os
 import dividerbin as dividerbin
-import lightbin as lightbin
 import solidbin as solidbin
 import uuid
+import importlib
 
 app = Flask(__name__)
 
@@ -28,6 +28,7 @@ app.wsgi_app = ProxyFix(
 # Flask-Bootstrap requires this line
 Bootstrap4(app)
 
+generators = []
 class GridfinityBinForm(FlaskForm):
     sizeUnitsX     = IntegerField("Width of the bin in grid units", widget=NumberInput(min = 1, max = MAX_GRID_UNITS), default=2)
     sizeUnitsY     = IntegerField("Length of the brick in grid units", widget=NumberInput(min = 1, max = MAX_GRID_UNITS), default=2)
@@ -41,13 +42,6 @@ class GridfinityBinForm(FlaskForm):
     addLabelRidge  = BooleanField("Add a label tab", default="True")
     multiLabel     = BooleanField("Add label tab for each compartment row", default="")
     submit         = SubmitField('Generate STL', id="cassicbin", name="classicbin")
-
-class LightBinForm(FlaskForm):
-    sizeUnitsX     = IntegerField("Width of the bin in grid units", widget=NumberInput(min = 1, max = MAX_GRID_UNITS), default=2)
-    sizeUnitsY     = IntegerField("Length of the brick in grid units", widget=NumberInput(min = 1, max = MAX_GRID_UNITS), default=2)
-    sizeUnitsZ     = IntegerField("Height of the brick in height-units", widget=NumberInput(min = 1, max = MAX_HEIGHT_UNITS), default=6)
-    addStackingLip = BooleanField("Add a stacking lip", default="True")
-    submit         = SubmitField('Generate STL', id="lightbin", name="lightbin")
 
 class SolidBinForm(FlaskForm):
     sizeUnitsX     = IntegerField("Width of the bin in grid units", widget=NumberInput(min = 1, max = MAX_GRID_UNITS), default=2)
@@ -93,33 +87,6 @@ def generateGridfinityBin(binform):
     # Send the generated STL file to the client
     return send_file(filename, as_attachment=True, download_name=downloadName)
 
-def generateLightBin(lightform):
-    # Copy the settings from the form
-    settings = lightbin.Settings()
-    settings.sizeUnitsX = lightform.sizeUnitsX.data
-    settings.sizeUnitsY = lightform.sizeUnitsY.data
-    settings.sizeUnitsZ = lightform.sizeUnitsZ.data
-    settings.addStackingLip = lightform.addStackingLip.data
-
-    # Construct the names for the temporary and downloaded file
-    filename = "/tmpfiles/" + str(uuid.uuid4()) + ".stl"
-    downloadName = "Light divider bin {0}x{1}x{2}.stl".format(settings.sizeUnitsX, settings.sizeUnitsY, settings.sizeUnitsZ)
-
-    # Generate the STL file
-    gen = lightbin.LightbinGenerator(settings)
-    gen.generate_stl(filename)
-
-    # Delete the temp file after it was downloaded
-    @after_this_request
-    def delete_image(response):
-        try:
-            os.remove(filename)
-        except Exception as ex:
-            print(ex)
-        return response
-
-    # Send the generated STL file to the client
-    return send_file(filename, as_attachment=True, download_name=downloadName)
 
 def generateSolidBin(solidform):
     # Copy the settings from the form
@@ -155,12 +122,17 @@ def generateSolidBin(solidform):
 def index():
     # you must tell the variable 'form' what you named the class, above
     # 'form' is the variable name used in this template: index.html
-    binform = GridfinityBinForm()
-    lightform = LightBinForm()
-    solidform = SolidBinForm()
+    forms = []
+    for gen in generators:
+        forms.append(gen.get_form())
+
     message = ""
 
     # Handle form submissions
+    for gen in generators:
+        if gen.handle(request):
+
+
     if "classicbin" in request.form and binform.validate_on_submit():
         return generateGridfinityBin(binform)
 
@@ -170,8 +142,26 @@ def index():
     if "solidbin" in request.form and solidform.validate_on_submit():
         return generateSolidBin(solidform)
 
-    return render_template('index.html', binform=binform, lightform=lightform, solidform=solidform, message=message)
 
+
+    return render_template('index.html', forms=, message=message)
+
+GEN_FOLDER = "./generators"
+MAIN_MODULE = "__init__"
+
+def get_generators():
+    generators = []
+    possible_generators = os.listdir(GEN_FOLDER)
+    for entry in possible_generators:
+        location = os.path.join(GEN_FOLDER, entry)
+        if not os.path.isdir(location) or not MAIN_MODULE + ".py" in os.listdir(location):
+            continue
+        info = importlib.find_module(MAIN_MODULE, [location])
+        generators.append({"name": entry, "info": info})
+    return generators
+
+def load_generator(generator):
+    return importlib.load_module(MAIN_MODULE, *generator["info"])
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.DEBUG)
@@ -179,6 +169,10 @@ if __name__ == "__main__":
     portNum = 5000 if 'FLASK_PORT' not in os.environ else os.environ['FLASK_PORT']
     debugMode = False if 'FLASK_DEBUG' not in os.environ else (os.environ['FLASK_DEBUG'] == 'True')
 
+    for gen in get_generators():
+        print("Loading generator " + gen["name"])
+        generators.append(load_generator(gen))
+    
     if debugMode:
         logger.info("GFG started in debug mode")
         port = int(os.environ.get('PORT', portNum))

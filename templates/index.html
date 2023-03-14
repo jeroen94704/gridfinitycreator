@@ -20,87 +20,24 @@
   <div class="container p-2 w-75">
     <ul class="nav nav-tabs">
       {% for form in forms %}
-      <li>
-        <button class="nav-link" data-toggle="tab" href="#bin">{{ form.get_title() }}</button>
-      </li>
+        <li>
+          <button class="nav-link {% if loop.first %}active{% endif %}" data-toggle="tab" href="#{{ form.id }}">{{ form.get_title() }}</button>
+        </li>
       {% endfor %}
     </ul>
-  </div>
-
-  <div class="tab-content p-2 border border-top-0">
-    <div id="bin" class="tab-pane active">
-      {% for form in forms %}
-      <p class="py-2 primary">{{ form.get_description() }}</p>
-      <form method="post">
-        {{ form.csrf_token() }}
-        {% for row in form.get_rows() %}
-          {{ wtf.render_form_row(row) }}
-        {% endfor %}
-      </form>
-      {% endfor %}
-    </div>
-
-  <div class="container p-2 w-75">
-    <ul class="nav nav-tabs">
-      <li class="active">
-        <button class="nav-link active" data-toggle="tab" href="#bin">Divider bin</button>
-      </li>
-      <li>
-        <button class="nav-link" data-toggle="tab" href="#lightbin">Light bin</button>
-      </li>
-      <li>
-        <button class="nav-link" data-toggle="tab" href="#solidbin">Solid bin</button>
-      </li>
-      <li>
-        <button class="nav-link" data-toggle="tab" href="#plate">Base plate</button>
-      </li>
-    </ul>
-
+  
     <div class="tab-content p-2 border border-top-0">
-      <div id="bin" class="tab-pane active">
-        <p class="py-2 primary">This generates a normal Gridfinity divider bin of your desired size with the extra option of compartments in both length and width directions</p>
-        <form method="post">
-          {{ binform.csrf_token() }}
-          {{ wtf.render_form_row([binform.sizeUnitsX, binform.sizeUnitsY, binform.sizeUnitsZ]) }}
-          {{ wtf.render_form_row([binform.compartmentsX, binform.compartmentsY], row_class="row row-cols-3") }}
-          {{ wtf.render_form_row([binform.addStackingLip, binform.addMagnetHoles, binform.addScrewHoles]) }}
-          {{ wtf.render_form_row([binform.addGrabCurve, binform.addLabelRidge, binform.multiLabel]) }}
-          <div class="form-row">
-            <div class="col"></div>
-            {{ wtf.render_field(binform.submit, class="col") }}
-            <div class="col"></div>
-          </div>
-        </form>
-      </div>
-      <div id="lightbin" class="tab-pane">
-        <p class="py-2 primary">This generates a light version of the normal Gridfinity bin that saves plastic and offers more room. This means magnets and/or screws are not possible</p>
-        <form method="post">
-          {{ lightform.csrf_token() }}
-          {{ wtf.render_form_row([lightform.sizeUnitsX, lightform.sizeUnitsY, lightform.sizeUnitsZ]) }}
-          {{ wtf.render_form_row([lightform.addStackingLip]) }}
-          <div class="form-row">
-            <div class="col"></div>
-            {{ wtf.render_field(lightform.submit, class="col") }}
-            <div class="col"></div>
-          </div>
-        </form>
-      </div>
-      <div id="solidbin" class="tab-pane">
-        <p class="py-2 primary">This generates a completely filled solid Gridfinity bin which can be used as a starting point for custom bins</p>
-        <form method="post">
-          {{ solidform.csrf_token() }}
-          {{ wtf.render_form_row([solidform.sizeUnitsX, solidform.sizeUnitsY, solidform.sizeUnitsZ]) }}
-          {{ wtf.render_form_row([solidform.addStackingLip, solidform.addMagnetHoles, solidform.addScrewHoles]) }}
-          <div class="form-row">
-            <div class="col"></div>
-            {{ wtf.render_field(solidform.submit, class="col") }}
-            <div class="col"></div>
-          </div>
-        </form>
-      </div>
-      <div id="plate" class="tab-pane">
-        <p class="py-2 primary">Nothing to see here (for now)</p>
-      </div>
+      {% for form in forms %}
+        <div id="{{ form.id }}" class="tab-pane {% if loop.first %}active{% endif %}">
+          <p class="py-2 primary">{{ form.get_description() }}</p>
+          <form method="post">
+            {{ form.csrf_token() }}
+            {% for row in form.get_rows() %}
+              {{ wtf.render_form_row(row, row_class="row row-cols-3") }}
+            {% endfor %}
+          </form>
+        </div>
+      {% endfor %}
     </div>
   </div>
 

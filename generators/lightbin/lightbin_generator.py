@@ -1,6 +1,6 @@
 import cadquery as cq
 from cadquery import exporters
-from gridfinity import *
+from gridfinity_constants import *
 
 class Generator:
     def __init__(self, settings) -> None:

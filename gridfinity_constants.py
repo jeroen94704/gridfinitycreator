@@ -22,3 +22,4 @@ EPSILON = 0.01 # CQ cannot chamfer an edge all the way to another edge, so reduc
 MAX_COMPARTMENTS_PER_GRID_UNIT = 3
 MAX_GRID_UNITS = 6
 MAX_HEIGHT_UNITS = 12
+MIN_HEIGHT_UNITS = 2

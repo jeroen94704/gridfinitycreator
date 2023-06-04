@@ -1,27 +1,8 @@
 import cadquery as cq
 from cadquery import exporters
-from dataclasses import dataclass
-from gridfinity import *
+from gridfinity_constants import *
 
-# Generator inputs
-@dataclass
-class Settings:
-    sizeUnitsX: int = 3 # Width (X) of the brick in grid units
-    sizeUnitsY: int = 2  # Length (Y) of the brick in grid units
-    sizeUnitsZ: int = 3  # Height (Z) of the brick in height-units
-
-    compartmentsX: int = 2 # The number of compartments in the X (width) direction 
-    compartmentsY: int = 1 # The number of compartments in the Y (length) direction 
-
-    addStackingLip: bool = True  # Add a stacking lip (True) or not (False)?
-    addGrabCurve:   bool = True  # Add a curved floor to easily get parts out of the bin
-    addLabelRidge:  bool = True  # Add a ridge to pick up the bin and attach a label
-    multiLabel:     bool = False # Add a ridge to every row of compartments?
-
-    labelRidgeWidth:  int = 13   
-    wallThickness: int = 1.5
-
-class LightbinGenerator:
+class Generator:
     def __init__(self, settings) -> None:
         self.settings = settings
 
@@ -191,8 +172,4 @@ class LightbinGenerator:
     def generate_stl(self, filename):
         model = self.generate_model()
         exporters.export(model, filename)
-
-    def render_model(self):
-        model = self.generate_model()
-        show_object(model)
 

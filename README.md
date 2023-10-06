@@ -37,3 +37,7 @@ I have no experience with other reverse proxy methods (Apache, nginx, Helm, etc)
 ## Donate
 
 If you find this project useful a small donation is much appreciated (but by no means required or expected): https://ko-fi.com/jeroen94704
+
+## License
+
+GridfinityCreator © 2023 by Jeroen Bouwens is licensed under CC BY-NC-SA 4.0. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/

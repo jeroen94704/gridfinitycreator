@@ -2,10 +2,10 @@ version: "3.3"
 
 services:
   cadquery:
-    build: ./
     container_name: cadquery
+    build: ./
     # Create a RAMdisk to store the generated files until they are downloaded to prevent wearing out the server's SSD
-    tmpfs: 
+    tmpfs:
       - /tmpfiles
     environment:
       - PUID=1000
@@ -13,18 +13,18 @@ services:
       - TZ=Europe/Amsterdam
     restart: unless-stopped
     networks:
-       - proxy
-    ports:
-      - 5000:5000
-    env_file: 
+      - proxy
+#    ports:
+#      - 5000:5000
+    env_file:
       - .env.container
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.gridfinity.rule=Host(`${GFG_DOMAIN}`)"
-    #   - "traefik.http.routers.gridfinity.entrypoints=websecure"
-    #   - "traefik.http.routers.gridfinity.service=gridfinity_service"
-    #   - "traefik.http.routers.gridfinity.tls.certResolver=leresolver"
-    #   - "traefik.http.services.gridfinity_service.loadbalancer.server.port=5000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gridfinity.rule=Host(`${GFG_DOMAIN:?error}`)"
+      - "traefik.http.routers.gridfinity.entrypoints=websecure"
+      - "traefik.http.routers.gridfinity.service=gridfinity_service"
+      - "traefik.http.routers.gridfinity.tls.certResolver=leresolver"
+      - "traefik.http.services.gridfinity_service.loadbalancer.server.port=5000"
 
 networks:
   proxy:

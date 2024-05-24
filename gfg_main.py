@@ -4,7 +4,7 @@ from flask_wtf import FlaskForm
 from wtforms import IntegerField, SubmitField, BooleanField
 from wtforms.widgets import NumberInput
 from waitress import serve
-from gridfinity_constants import *
+from grid_constants import *
 from werkzeug.middleware.proxy_fix import ProxyFix
 from contextlib import contextmanager
 

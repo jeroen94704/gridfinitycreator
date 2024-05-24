@@ -1,28 +1,30 @@
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, SubmitField, BooleanField
+from wtforms import IntegerField, SelectField, BooleanField
+from flask_bootstrap import Bootstrap5, SwitchField
 from wtforms.widgets import NumberInput
-from gridfinity_constants import *
+from grid_constants import *
+import os
 
 class Form(FlaskForm):
     id = "lightbin"
-    sizeUnitsX     = IntegerField("Width of the bin in grid units", widget=NumberInput(min = 1, max = MAX_GRID_UNITS), default=2)
-    sizeUnitsY     = IntegerField("Length of the bin in grid units", widget=NumberInput(min = 1, max = MAX_GRID_UNITS), default=2)
-    sizeUnitsZ     = IntegerField("Height of the bin in height-units", widget=NumberInput(min = 1, max = MAX_HEIGHT_UNITS), default=6)
-    addStackingLip = BooleanField("Add a stacking lip", default="True")
-    submit         = SubmitField('Generate STL', id=id, name=id)
+    sizeUnitsX     = IntegerField("Width", widget=NumberInput(min = 1, max = Grid.MAX_GRID_UNITS), default=2)
+    sizeUnitsY     = IntegerField("Length", widget=NumberInput(min = 1, max = Grid.MAX_GRID_UNITS), default=2)
+    sizeUnitsZ     = IntegerField("Height", widget=NumberInput(min = 1, max = Grid.MAX_HEIGHT_UNITS), default=6)
+    addStackingLip = BooleanField("Stacking lip", default="True")
+    exportFormat   = SelectField('Export format', choices=[('stl', 'STL'), ('step', 'STEP')])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
     def get_rows(self):
         return [
-            [self.sizeUnitsX, self.sizeUnitsY, self.sizeUnitsZ],
-            [self.addStackingLip],
-            [self.submit]
+            ["Size", [self.sizeUnitsX, self.sizeUnitsY, self.sizeUnitsZ]],
+            ["Options", [self.addStackingLip, self.exportFormat]],
         ]
     
     def get_title(self):
         return "Light bin"
     
     def get_description(self):
-        return "This generates a light version of the normal Gridfinity bin that saves plastic and offers more room. This means magnets and/or screws are not possible"
+        with open(os.path.dirname(__file__) + '/lightbin_description.html', 'r') as reader:
+            return reader.read()       

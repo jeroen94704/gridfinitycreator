@@ -3,6 +3,7 @@ from flask import send_file, Flask, after_this_request
 import solidbin_generator as generator
 import solidbin_form as form
 import solidbin_settings as settings
+import grid_constants
 
 import uuid
 import os
@@ -18,13 +19,18 @@ def process(form):
     s.sizeUnitsZ = form.sizeUnitsZ.data
     s.addStackingLip = form.addStackingLip.data
     s.addMagnetHoles = form.addMagnetHoles.data
+    s.magnetHoleDiameter = float(form.magnetHoleDiameter.data)
+    s.addRemovalHoles = form.addRemovalHoles.data
     s.addScrewHoles = form.addScrewHoles.data
-
+    
+    # Default grid (Gridfinity)
+    g = grid_constants.Grid()
+    
     # Construct the names for the temporary and downloaded file
-    filename = "/tmpfiles/" + str(uuid.uuid4()) + ".stl"
+    filename = "/tmpfiles/" + str(uuid.uuid4()) + "." + form.exportFormat.data
 
     # Generate the STL file
-    gen = generator.Generator(s)
+    gen = generator.Generator(s, g)
     gen.generate_stl(filename)
 
     # Delete the temp file after it was downloaded
@@ -37,7 +43,7 @@ def process(form):
         return response
 
     # Send the generated STL file to the client
-    downloadName = "Solid Bin {0}x{1}x{2}.stl".format(s.sizeUnitsX, s.sizeUnitsY, s.sizeUnitsZ)
+    downloadName = "Solid Bin {0}x{1}x{2}.{3}".format(s.sizeUnitsX, s.sizeUnitsY, s.sizeUnitsZ, form.exportFormat.data)
     return send_file(filename, as_attachment=True, download_name=downloadName)
 
 def get_form():

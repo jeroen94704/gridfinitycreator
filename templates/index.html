@@ -1,52 +1,175 @@
 {% extends 'base.html' %}
-{% import "bootstrap4/form.html" as wtf %}
+{% import "bootstrap5/form.html" as wtf %}
 
 {% block content %}
 
-<div class="container">
-  <div class="py-2 text-center">
-    <h2>Welcome Gridfinifans!</h2>
-    <p class="text-muted">(Yes, that is a word I made up. Yes, it's terrible. No, I don't feel guilty)</p>
-  </div>
+<div class="container-fluid" style="max-width: 60%;">
 
-  <p class="py-2 primary lead">This page generates STL files for customizable Gridfinity components, such as the basic divider bin. You can specify grid-unit-size and
-  other parameters (such as number of compartments), and toggle options like holes magnets and/or screws, stacking lip, etc. Just fill in the parameters 
-  for one of the generators below and click the "Generate STL" button.</p>
-
-  <p class="py-2 primary lead">Feel free to let me know what you think on <a href="https://hackaday.social/@Jeroen94704">Mastodon</a> or <a href="https://discord.com/users/303964784984850433">Discord</a></p>
-
-  <p class="py-2 lead text-warning">NOTE: This is a very early alpha version. It may produce incorrect output, fail inexplicably or cease to exist at any moment.</p>
-
-  <div class="container p-2 w-75">
-    <ul class="nav nav-tabs">
-      {% for form in forms %}
-        <li>
-          <button class="nav-link {% if loop.first %}active{% endif %}" data-toggle="tab" href="#{{ form.id }}">{{ form.get_title() }}</button>
-        </li>
-      {% endfor %}
-    </ul>
-  
-    <div class="tab-content p-2 border border-top-0">
-      {% for form in forms %}
-        <div id="{{ form.id }}" class="tab-pane {% if loop.first %}active{% endif %}">
-          <p class="py-2 primary">{{ form.get_description() }}</p>
-          <form method="post">
-            {{ form.csrf_token() }}
-            {% for row in form.get_rows() %}
-              {{ wtf.render_form_row(row, row_class="row row-cols-3") }}
-            {% endfor %}
-          </form>
-        </div>
-      {% endfor %}
+  <div class="row">
+    <div class="col">
+      <div class="bg-primary" data-bs-theme="dark">
+        <h1 class="text-center text-white p-3">Gridfinity Creator</h1>
+      </div>
     </div>
   </div>
 
-  <p class="py-2"><strong>{{ message }}</strong></p>
+  <div class="row">
+    <div class="col">
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" data-toggle="tab" href="#home">Home</button>
+        </li>
+        {% for form in forms %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-toggle="tab" href="#{{ form.id }}">{{ form.get_title() }}</button>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <!-- <div class="col-1 text-end border-bottom">
+      <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#settings"
+        aria-controls="settings">...</button>
+    </div> -->
+  </div>
+
+  <div class="tab-content p-1 border border-top-0">
+    <div id="home" class="tab-pane active">
+      <div class="row p-3">
+        <div class="col">
+          <p>
+          <h5>Welcome!</h5>
+          </p>
+
+          <p>
+            This site generates STL files for several types of customizable Gridfinity components. For each type you can
+            specify size (length, width and height), but also parameters such as the number of compartments and options
+            like whether or not to include magnet- and/or screw-holes, a stacking lip and more. Just fill in the
+            parameters and click the "Generate STL" button.
+          </p>
+
+          <div class="alert alert-warning">
+            <h5 class="alert-heading">Warning</h5>
+            <p class="mb-0">
+              This is alpha software. It may produce incorrect output, fail inexplicably or cease to exist at any
+              moment.
+            </p>
+          </div>
+
+          <p>
+          <h5>Grid units</h5>
+          </p>
+
+          <p>The <a src="https://gridfinity.xyz/specification/">Gridfinity Design Reference</a> specifies the following
+            grid unit sizes:</p>
+
+          <ul>
+            <li>Length, Width: 42mm</li>
+            <li>Height: 7mm (with a minimum height of 2 units, including the base)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    {% for form in forms %}
+    <div id="{{ form.id }}" class="tab-pane">
+      <div class="row p-3">
+        <div class="col-9">
+          <p>{{ form.get_description()|safe }}</p>
+        </div>
+        <div class="col">
+          <img src="/static/{{form.id}}_sample.jpg" class="img-fluid rounded mx-auto d-block" />
+        </div>
+      </div>
+      <div class="row p-3">
+        <div class="col">
+          <div class="card p-0 mb-3">
+            <div class="card-header text-white bg-primary">Settings</div>
+            <div class="card-body">
+              <form method="post">
+                <div class="row">
+                  {{ form.csrf_token() }}
+                  {% for row in form.get_rows() if row[0] %}
+                  <div class="col-6">
+                    <div class="card border-secondary mb-3">
+                      <div class="card-header">{{ row[0] }}</div>
+                      <div class="card-body">
+                        {% for field in row[1] %}
+                        <div class="row m-1">
+                          <div class="col-5 text-end">{{ field.label }}:</div>
+                          <div class="col-7">
+                            {% if field.widget.input_type == 'checkbox' %}
+                            <div class="form-check form-switch">
+                              {{ field(role_="switch", class_="form-check-input") }}
+                            </div>
+                            {% elif field.type == 'SelectField' %}
+                              {{ field(class_="form-select") }}
+                            {% else %}
+                              {{ field() }}
+                            {% endif %}
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                  {{ loop.cycle('', '<div class="w-100"></div>')|safe }}
+                  {% endfor %}
+                </div>
+                <div class="row justify-content-center">
+                  <div class="col text-center">
+                    <input class="btn btn-primary" id="{{form.id}}" name="{{form.id}}" type="submit" value="Generate">
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- <div class="offcanvas offcanvas-start" tabindex="-1" id="settings" aria-labelledby="settingsLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="settingsLabel">Advanced settings</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div>
+        Below are detailed properties used by the generator to create components. The defaults are Gridfinity
+        compliant
+        and have been tested to work well, so don't make any changes unless you have a pressing reason to do so. You
+        can
+        also select one of the presets.
+      </div>
+      <hr />
+      <h5>Presets</h5>
+      <div class="dropdown mt-3">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+          data-bs-toggle="dropdown">
+          Gridfinity
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <li><a class="dropdown-item" href="#">Gridfinity</a></li>
+          <li><a class="dropdown-item" href="#">Raaco</a></li>
+          <li><a class="dropdown-item" href="#">Custom</a></li>
+        </ul>
+      </div>
+      <hr />
+      <h5>Constants</h5>
+    </div>
+  </div> -->
+
+  <div class="row text-center pb-4">
+    <div class="col">
+      <footer>&copy;2024 Jeroen Bouwens. Source code available on <a
+          href="https://github.com/jeroen94704/gridfinitycreator">GitHub</a>. Feel free to contact me on <a
+          href="https://fosstodon.org/@jeroen94704">Mastodon</a> or <a
+          href="https://discord.com/users/303964784984850433">Discord</a>
+      </footer>
+    </div>
+  </div>
+
 </div>
 
-{%- block footer %}
-<footer class="container">&copy;2023 Jeroen Bouwens</footer>
-{%- endblock footer %}
-
 {% endblock %}
-

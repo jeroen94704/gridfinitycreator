@@ -8,7 +8,7 @@ import grid_constants
 import uuid
 import os
 
-def process(form):
+def process(form, constants):
     # Copy the settings from the form
     s = settings.Settings()
     
@@ -28,7 +28,10 @@ def process(form):
     s.multiLabel = form.multiLabel.data
 
     # Default grid (Gridfinity)
-    g = grid_constants.Grid()
+    if not constants:
+        g = grid_constants.Grid()
+    else:
+        g = constants
 
     # Construct the names for the temporary and downloaded file
     filename = "/tmpfiles/" + str(uuid.uuid4()) + "." + form.exportFormat.data

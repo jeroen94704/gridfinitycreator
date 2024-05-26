@@ -11,7 +11,7 @@ import os
 def get_generator(settings):
     return generator.Generator(settings)
 
-def process(form):
+def process(form, constants):
     # Copy the settings from the form
     s = settings.Settings()
     s.sizeUnitsX = form.sizeUnitsX.data
@@ -24,7 +24,10 @@ def process(form):
     s.addScrewHoles = form.addScrewHoles.data
     
     # Default grid (Gridfinity)
-    g = grid_constants.Grid()
+    if not constants:
+        g = grid_constants.Grid()
+    else:
+        g = constants
     
     # Construct the names for the temporary and downloaded file
     filename = "/tmpfiles/" + str(uuid.uuid4()) + "." + form.exportFormat.data

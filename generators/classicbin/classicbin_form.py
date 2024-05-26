@@ -1,6 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, DecimalField, SelectField
-from flask_bootstrap import Bootstrap5, SwitchField
+from wtforms import IntegerField, DecimalField, SelectField, BooleanField
 from wtforms.widgets import NumberInput
 from grid_constants import *
 
@@ -13,14 +12,14 @@ class Form(FlaskForm):
     sizeUnitsZ      = IntegerField("Height", widget=NumberInput(min = Grid.MIN_HEIGHT_UNITS, max = Grid.MAX_HEIGHT_UNITS), default=6)
     compartmentsX   = IntegerField("Width direction", widget=NumberInput(min = 1, max = Grid.MAX_COMPARTMENTS_PER_GRID_UNIT*Grid.MAX_GRID_UNITS), default=3)
     compartmentsY   = IntegerField("Length direction", widget=NumberInput(min = 1, max = Grid.MAX_COMPARTMENTS_PER_GRID_UNIT*Grid.MAX_GRID_UNITS), default=3)
-    addStackingLip  = SwitchField("Stacking lip", default="True") #, description="The stacking lip is the raised edge at the top of the bin into which another bin fits. On by default, but sometimes you may want to omit it."
-    addMagnetHoles  = SwitchField("Magnet holes", default="True")
+    addStackingLip  = BooleanField("Stacking lip", default="checked", false_values=(False, "false", ""))
+    addMagnetHoles  = BooleanField("Magnet holes", default="true", false_values=(False, "false", ""))
     magnetHoleDiameter = DecimalField("Magnet-hole diameter", default = 6.5, places = 2)
-    addRemovalHoles = SwitchField("Magnet removal holes", default="False")
-    addScrewHoles   = SwitchField("Screw holes", default="False")
-    addGrabCurve    = SwitchField("Scoop ramp", default="True")
-    addLabelRidge   = SwitchField("Add label tab(s)", default="True")
-    multiLabel      = SwitchField("Label tab per row", default="False")
+    addRemovalHoles = BooleanField("Magnet removal holes", false_values=(False, "false", ""))
+    addScrewHoles   = BooleanField("Screw holes", false_values=(False, "false", ""))
+    addGrabCurve    = BooleanField("Scoop ramp", default="true", false_values=(False, "false", ""))
+    addLabelRidge   = BooleanField("Add label tab(s)", default="true", false_values=(False, "false", ""))
+    multiLabel      = BooleanField("Label tab per row", false_values=(False, "false", ""))
     exportFormat    = SelectField('Export format', choices=[('stl', 'STL'), ('step', 'STEP')])
 
     def __init__(self, *args, **kwargs):

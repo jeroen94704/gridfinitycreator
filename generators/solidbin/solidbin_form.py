@@ -1,6 +1,5 @@
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, DecimalField, SelectField, BooleanField
-from flask_bootstrap import Bootstrap5, SwitchField
 from wtforms.widgets import NumberInput
 from grid_constants import *
 import os
@@ -13,8 +12,8 @@ class Form(FlaskForm):
     addStackingLip = BooleanField("Stacking lip", default="True")
     addMagnetHoles = BooleanField("Magnet holes", default="True")
     magnetHoleDiameter = DecimalField("Magnet-hole diameter", default = 6.5, places = 2)
-    addRemovalHoles = SwitchField("Magnet removal holes", default="False")
-    addScrewHoles   = SwitchField("Screw holes", default="False")
+    addRemovalHoles = BooleanField("Magnet removal holes", default="False")
+    addScrewHoles   = BooleanField("Screw holes", default="False")
     exportFormat    = SelectField('Export format', choices=[('stl', 'STL'), ('step', 'STEP')])
 
     def __init__(self, *args, **kwargs):

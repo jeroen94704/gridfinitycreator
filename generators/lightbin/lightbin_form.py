@@ -1,6 +1,5 @@
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, SelectField, BooleanField
-from flask_bootstrap import Bootstrap5, SwitchField
 from wtforms.widgets import NumberInput
 from grid_constants import *
 import os

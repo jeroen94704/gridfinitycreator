@@ -3,17 +3,19 @@
 
 {% block content %}
 
-<div class="container-fluid" style="max-width: 60%;">
+<div class="container-fluid border mb-3" style="max-width: 70%;">
 
-  <div class="row">
+  <div class="row bg-primary align-items-center" data-bs-theme="dark">
     <div class="col">
-      <div class="bg-primary" data-bs-theme="dark">
-        <h1 class="text-center text-white p-3">Gridfinity Creator</h1>
-      </div>
+      <h1 class="text-center text-white p-2">Gridfinity Creator</h1>
+    </div>
+    <div class="col-1 text-end">
+      <button class="btn btn-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#settings"
+        aria-controls="settings">...</button>
     </div>
   </div>
 
-  <div class="row">
+  <div class="row mt-3">
     <div class="col">
       <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item" role="presentation">
@@ -26,13 +28,9 @@
         {% endfor %}
       </ul>
     </div>
-    <!-- <div class="col-1 text-end border-bottom">
-      <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#settings"
-        aria-controls="settings">...</button>
-    </div> -->
   </div>
 
-  <div class="tab-content p-1 border border-top-0">
+  <div class="tab-content border border-top-0 mb-3">
     <div id="home" class="tab-pane active">
       <div class="row p-3">
         <div class="col">
@@ -82,7 +80,7 @@
       </div>
       <div class="row p-3">
         <div class="col">
-          <div class="card p-0 mb-3">
+          <div class="card p-0">
             <div class="card-header text-white bg-primary">Settings</div>
             <div class="card-body">
               <form method="post">
@@ -90,7 +88,7 @@
                   {{ form.csrf_token() }}
                   {% for row in form.get_rows() if row[0] %}
                   <div class="col-6">
-                    <div class="card border-secondary mb-3">
+                    <div class="card mb-3">
                       <div class="card-header">{{ row[0] }}</div>
                       <div class="card-body">
                         {% for field in row[1] %}
@@ -99,7 +97,11 @@
                           <div class="col-7">
                             {% if field.widget.input_type == 'checkbox' %}
                             <div class="form-check form-switch">
-                              {{ field(role_="switch", class_="form-check-input") }}
+                              {% if field.object_data %}
+                                {{ field(role_="switch", class_="form-check-input", checked_=field.object_data) }}
+                              {% else %}
+                                {{ field(role_="switch", class_="form-check-input") }}
+                              {% endif %}
                             </div>
                             {% elif field.type == 'SelectField' %}
                               {{ field(class_="form-select") }}
@@ -129,47 +131,92 @@
     {% endfor %}
   </div>
 
-  <!-- <div class="offcanvas offcanvas-start" tabindex="-1" id="settings" aria-labelledby="settingsLabel">
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="settings" aria-labelledby="settingsLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="settingsLabel">Advanced settings</h5>
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
       <div>
-        Below are detailed properties used by the generator to create components. The defaults are Gridfinity
-        compliant
-        and have been tested to work well, so don't make any changes unless you have a pressing reason to do so. You
-        can
-        also select one of the presets.
+        <p>Below is the specification of the grid used by the generator to create components. You can select one of
+          the presets or adjust the settings individually.</p>
+        <div class="alert alert-info">
+          <h5 class="alert-heading">Note</h5>
+          <p class="mb-0">All measurements are in millimeters</p>
+        </div>
+        <div class="alert alert-danger">
+          <h5 class="alert-heading">Beware</h5>
+          <p class="mb-0">The defaults comply with the Gridfinity specification and have been tested to work well.
+            Don't make any changes unless you have a good reason to do so and you know what you're doing.</p>
+        </div>
       </div>
       <hr />
       <h5>Presets</h5>
-      <div class="dropdown mt-3">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
-          data-bs-toggle="dropdown">
-          Gridfinity
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <li><a class="dropdown-item" href="#">Gridfinity</a></li>
-          <li><a class="dropdown-item" href="#">Raaco</a></li>
-          <li><a class="dropdown-item" href="#">Custom</a></li>
-        </ul>
-      </div>
+      <select class="form-select" id="grid-presets" onchange="presetChanged()">
+        <option value="Gridfinity" selected>Gridfinity</option>
+        <option value="Raaco">Raaco</option>
+      </select>
+      <p id="demo"></p>
       <hr />
       <h5>Constants</h5>
-    </div>
-  </div> -->
-
-  <div class="row text-center pb-4">
-    <div class="col">
-      <footer>&copy;2024 Jeroen Bouwens. Source code available on <a
-          href="https://github.com/jeroen94704/gridfinitycreator">GitHub</a>. Feel free to contact me on <a
-          href="https://fosstodon.org/@jeroen94704">Mastodon</a> or <a
-          href="https://discord.com/users/303964784984850433">Discord</a>
-      </footer>
+      <form method="post">
+        <div class="row justify-content-center">
+          <div class="col text-center">
+            <div class="row m-1">
+              <div class="col-4 text-end"><label for="gridSizeX">Grid size X</label>:</div>
+              <div class="col-8">
+                <input id="gridSizeX" name="gridSizeX" type="number" step="any" value="{{gridsize_x}}">
+              </div>
+            </div>
+            <div class="row m-1">
+              <div class="col-4 text-end"><label for="gridSizeZ">Grid size Y</label>:</div>
+              <div class="col-8">
+                <input id="gridSizeY" name="gridSizeY" type="number" step="any" value="{{gridsize_y}}">
+              </div>
+            </div>
+            <div class="row m-1">
+              <div class="col-4 text-end"><label for="gridSizeZ">Height unit</label>:</div>
+              <div class="col-8">
+                <input id="gridSizeZ" name="gridSizeZ" type="number" step="any" value="{{gridsize_z}}">
+              </div>
+            </div>
+            <div class="row m-1">
+              <div class="col">
+                <input class="btn btn-primary" id="advanced_settings" name="advanced_settings" type="submit"
+                  value="Save">
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
-
+</div>
+<div class="row text-center pb-4">
+  <div class="col">
+    <footer>Gridfinity Creator v{{version}}. &copy;2024 Jeroen Bouwens. Source code available on <a
+        href="https://github.com/jeroen94704/gridfinitycreator">GitHub</a>. Feel free to contact me on <a
+        href="https://fosstodon.org/@jeroen94704">Mastodon</a> or <a
+        href="https://discord.com/users/303964784984850433">Discord</a>
+    </footer>
+  </div>
 </div>
 
+<script>
+  function presetChanged() {
+    var presetName = document.getElementById("grid-presets").value;
+    switch (presetName) {
+      case "Gridfinity":
+        document.getElementById("gridSizeX").value = "42.0";
+        document.getElementById("gridSizeY").value = "42.0";
+        document.getElementById("gridSizeZ").value = "7.0";
+        break;
+      case "Raaco":
+        document.getElementById("gridSizeX").value = "39.5";
+        document.getElementById("gridSizeY").value = "54.5";
+        document.getElementById("gridSizeZ").value = "7.0";
+        break;
+    }
+  }
+</script>
 {% endblock %}

@@ -1,38 +1,42 @@
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, SubmitField, BooleanField
+from wtforms import IntegerField, DecimalField, SelectField, BooleanField
 from wtforms.widgets import NumberInput
-from gridfinity_constants import *
+from grid_constants import *
+
+import os
 
 class Form(FlaskForm):
     id = "classicbin"
-    sizeUnitsX     = IntegerField("Width of the bin in grid units", widget=NumberInput(min = 1, max = MAX_GRID_UNITS), default=2)
-    sizeUnitsY     = IntegerField("Length of the brick in grid units", widget=NumberInput(min = 1, max = MAX_GRID_UNITS), default=2)
-    sizeUnitsZ     = IntegerField("Height of the brick in height-units", widget=NumberInput(min = MIN_HEIGHT_UNITS, max = MAX_HEIGHT_UNITS), default=6)
-    compartmentsX  = IntegerField("Number of compartments in the width direction", widget=NumberInput(min = 1, max = MAX_COMPARTMENTS_PER_GRID_UNIT*MAX_GRID_UNITS), default=3)
-    compartmentsY  = IntegerField("Number of compartments in the length direction", widget=NumberInput(min = 1, max = MAX_COMPARTMENTS_PER_GRID_UNIT*MAX_GRID_UNITS), default=3)
-    addStackingLip = BooleanField("Add a stacking lip", default="True")
-    addMagnetHoles = BooleanField("Add holes for magnets", default="True")
-    addScrewHoles  = BooleanField("Add holes for screws", default="True")
-    addGrabCurve   = BooleanField("Add a curved scoop surface", default="True")
-    addLabelRidge  = BooleanField("Add a label tab", default="True")
-    multiLabel     = BooleanField("Add label tab for each compartment row", default="")
-    submit         = SubmitField('Generate STL', id=id, name=id)
+    sizeUnitsX      = IntegerField("Width", widget=NumberInput(min = 1, max = Grid.MAX_GRID_UNITS), default=2)
+    sizeUnitsY      = IntegerField("Length", widget=NumberInput(min = 1, max = Grid.MAX_GRID_UNITS), default=2)
+    sizeUnitsZ      = IntegerField("Height", widget=NumberInput(min = Grid.MIN_HEIGHT_UNITS, max = Grid.MAX_HEIGHT_UNITS), default=6)
+    compartmentsX   = IntegerField("Width direction", widget=NumberInput(min = 1, max = Grid.MAX_COMPARTMENTS_PER_GRID_UNIT*Grid.MAX_GRID_UNITS), default=3)
+    compartmentsY   = IntegerField("Length direction", widget=NumberInput(min = 1, max = Grid.MAX_COMPARTMENTS_PER_GRID_UNIT*Grid.MAX_GRID_UNITS), default=3)
+    addStackingLip  = BooleanField("Stacking lip", default="checked", false_values=(False, "false", ""))
+    addMagnetHoles  = BooleanField("Magnet holes", default="true", false_values=(False, "false", ""))
+    magnetHoleDiameter = DecimalField("Magnet-hole diameter", default = 6.5, places = 2)
+    addRemovalHoles = BooleanField("Magnet removal holes", false_values=(False, "false", ""))
+    addScrewHoles   = BooleanField("Screw holes", false_values=(False, "false", ""))
+    addGrabCurve    = BooleanField("Scoop ramp", default="true", false_values=(False, "false", ""))
+    addLabelRidge   = BooleanField("Add label tab(s)", default="true", false_values=(False, "false", ""))
+    multiLabel      = BooleanField("Label tab per row", false_values=(False, "false", ""))
+    exportFormat    = SelectField('Export format', choices=[('stl', 'STL'), ('step', 'STEP')])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def get_rows(self):
         return [
-          [self.sizeUnitsX, self.sizeUnitsY, self.sizeUnitsZ],
-          [self.compartmentsX, self.compartmentsY],
-          [self.addStackingLip, self.addMagnetHoles, self.addScrewHoles],
-          [self.addGrabCurve, self.addLabelRidge, self.multiLabel],
-          [self.submit]
+          ["Size", [self.sizeUnitsX, self.sizeUnitsY, self.sizeUnitsZ]],
+          ["Compartments", [self.compartmentsX, self.compartmentsY]],
+          ["Magnets", [self.addMagnetHoles, self.addRemovalHoles, self.addScrewHoles, self.magnetHoleDiameter]],
+          ["Other", [self.addStackingLip, self.addGrabCurve, self.exportFormat]],
+          ["Labels", [self.addLabelRidge, self.multiLabel]],
         ]
     
     def get_title(self):
-        return "Classic bin"
+        return "Divider bin"
     
     def get_description(self):
-        return "This generates a normal Gridfinity divider bin of your desired size with the extra option of compartments in both length and width directions"
-    
+        with open(os.path.dirname(__file__) + '/classicbin_description.html', 'r') as reader:
+            return reader.read()    

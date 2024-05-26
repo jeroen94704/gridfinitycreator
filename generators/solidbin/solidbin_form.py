@@ -1,30 +1,35 @@
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, SubmitField, BooleanField
+from wtforms import IntegerField, DecimalField, SelectField, BooleanField
 from wtforms.widgets import NumberInput
-from gridfinity_constants import *
+from grid_constants import *
+import os
 
 class Form(FlaskForm):
     id = "solidbin"
-    sizeUnitsX     = IntegerField("Width of the bin in grid units", widget=NumberInput(min = 1, max = MAX_GRID_UNITS), default=2)
-    sizeUnitsY     = IntegerField("Length of the brick in grid units", widget=NumberInput(min = 1, max = MAX_GRID_UNITS), default=2)
-    sizeUnitsZ     = IntegerField("Height of the brick in height-units", widget=NumberInput(min = 1, max = MAX_HEIGHT_UNITS), default=6)
-    addStackingLip = BooleanField("Add a stacking lip", default="True")
-    addMagnetHoles = BooleanField("Add holes for magnets", default="True")
-    addScrewHoles  = BooleanField("Add holes for screws", default="True")
-    submit         = SubmitField('Generate STL', id=id, name=id)
+    sizeUnitsX     = IntegerField("Width", widget=NumberInput(min = 1, max = Grid.MAX_GRID_UNITS), default=2)
+    sizeUnitsY     = IntegerField("Length", widget=NumberInput(min = 1, max = Grid.MAX_GRID_UNITS), default=2)
+    sizeUnitsZ     = IntegerField("Height", widget=NumberInput(min = 1, max = Grid.MAX_HEIGHT_UNITS), default=6)
+    addStackingLip = BooleanField("Stacking lip", default="True")
+    addMagnetHoles = BooleanField("Magnet holes", default="True")
+    magnetHoleDiameter = DecimalField("Magnet-hole diameter", default = 6.5, places = 2)
+    addRemovalHoles = BooleanField("Magnet removal holes", default="False")
+    addScrewHoles   = BooleanField("Screw holes", default="False")
+    exportFormat    = SelectField('Export format', choices=[('stl', 'STL'), ('step', 'STEP')])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
     def get_rows(self):
         return [
-            [self.sizeUnitsX, self.sizeUnitsY, self.sizeUnitsZ],
-            [self.addStackingLip, self.addMagnetHoles, self.addScrewHoles],
-            [self.submit]
+          ["Size", [self.sizeUnitsX, self.sizeUnitsY, self.sizeUnitsZ]],
+          ["Magnets", [self.addMagnetHoles, self.addRemovalHoles, self.addScrewHoles, self.magnetHoleDiameter]],
+          ["Other", [self.addStackingLip, self.exportFormat]],
         ]
     
     def get_title(self):
         return "Solid bin"
     
     def get_description(self):
-        return "This generates a completely filled solid Gridfinity bin which can be used as a starting point for custom bins"
+        with open(os.path.dirname(__file__) + '/solidbin_description.html', 'r') as reader:
+            return reader.read()    
+        

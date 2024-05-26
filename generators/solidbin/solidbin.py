@@ -1,7 +1,7 @@
 import cadquery as cq
 from cadquery import exporters
 from dataclasses import dataclass
-from gridfinity_constants import *
+from grid_constants import *
 
 # Generator inputs
 @dataclass
@@ -25,8 +25,8 @@ class SolidbinGenerator:
 
     def precalculate(self):
         """Precalculate a number of useful derived values used in construction"""
-        self.brickSizeX = self.settings.sizeUnitsX * GRID_UNIT_SIZE_MM - BRICK_SIZE_TOLERANCE_MM 
-        self.brickSizeY = self.settings.sizeUnitsY * GRID_UNIT_SIZE_MM - BRICK_SIZE_TOLERANCE_MM
+        self.brickSizeX = self.settings.sizeUnitsX * GRID_UNIT_SIZE_X_MM - BRICK_SIZE_TOLERANCE_MM 
+        self.brickSizeY = self.settings.sizeUnitsY * GRID_UNIT_SIZE_Y_MM - BRICK_SIZE_TOLERANCE_MM
         self.brickSizeZ = self.settings.sizeUnitsZ*HEIGHT_UNITSIZE_MM
         self.internalSizeX = self.brickSizeX-2*WALL_THICKNESS
         self.internalSizeY = self.brickSizeY-2*WALL_THICKNESS
@@ -36,35 +36,35 @@ class SolidbinGenerator:
         """Construct a 1x1 GridFinity unit base on the provided workplane"""
         
         # The elements are constructed "centered" because that makes life easier. 
-        baseBottom = basePlane.box(BASE_BOTTOM_SIZE, BASE_BOTTOM_SIZE, BASE_BOTTOM_THICKNESS, combine=False)
-        baseBottom = baseBottom.edges("|Z").fillet(1.6)
-        baseBottom = baseBottom.faces("<Z").chamfer(0.8)
+        baseBottom = basePlane.box(BASE_BOTTOM_SIZE_X, BASE_BOTTOM_SIZE_Y, BASE_BOTTOM_THICKNESS, combine=False)
+        baseBottom = baseBottom.edges("|Z").fillet(BASE_BOTTOM_FILLET_RADIUS)
+        baseBottom = baseBottom.faces("<Z").chamfer(BASE_BOTTOM_CHAMFER_SIZE)
         
         baseTop = baseBottom.faces(">Z").workplane()
-        baseTop = baseTop.box(BRICK_UNIT_SIZE, BRICK_UNIT_SIZE, BASE_TOP_THICKNESS, centered=(True, True, False), combine=False)
-        baseTop = baseTop.edges("|Z").fillet(CORNER_FILLET_RADIUS)
-        baseTop = baseTop.faces("<Z").chamfer(BASE_TOP_THICKNESS-EPSILON)
+        baseTop = baseTop.box(BRICK_UNIT_SIZE_X, BRICK_UNIT_SIZE_Y, BASE_TOP_THICKNESS, centered=(True, True, False), combine=False)
+        baseTop = baseTop.edges("|Z").fillet(BASE_TOP_FILLET_RADIUS)
+        baseTop = baseTop.faces("<Z").chamfer(BASE_TOP_CHAMFER_SIZE)
         
         result = baseTop | baseBottom
         
         if self.settings.addMagnetHoles:
             result = result.faces("<Z").workplane()
-            result = result.pushPoints([(HOLE_OFFSET, HOLE_OFFSET),
-                                                (-HOLE_OFFSET, HOLE_OFFSET),
-                                                (HOLE_OFFSET, -HOLE_OFFSET),
-                                                (-HOLE_OFFSET, -HOLE_OFFSET)])
-            result = result.hole(MAGNET_HOLE_DIAMETER, MAGNET_HOLE_DEPTH)
+            result = result.pushPoints([(HOLE_OFFSET_X, HOLE_OFFSET_Y),
+                                                (-HOLE_OFFSET_X, HOLE_OFFSET_Y),
+                                                (HOLE_OFFSET_X, -HOLE_OFFSET_Y),
+                                                (-HOLE_OFFSET_X, -HOLE_OFFSET_Y)])
+            result = result.hole(DEFAULT_MAGNET_HOLE_DIAMETER, DEFAULT_MAGNET_HOLE_DEPTH)
 
         if self.settings.addScrewHoles:
             result = result.faces("<Z").workplane()
-            result = result.pushPoints([(HOLE_OFFSET, HOLE_OFFSET),
-                                        (-HOLE_OFFSET, HOLE_OFFSET),
-                                        (HOLE_OFFSET, -HOLE_OFFSET),
-                                        (-HOLE_OFFSET, -HOLE_OFFSET)])
+            result = result.pushPoints([(HOLE_OFFSET_X, HOLE_OFFSET_Y),
+                                        (-HOLE_OFFSET_X, HOLE_OFFSET_Y),
+                                        (HOLE_OFFSET_X, -HOLE_OFFSET_Y),
+                                        (-HOLE_OFFSET_X, -HOLE_OFFSET_Y)])
             result = result.hole(SCREW_HOLE_DIAMETER, SCREW_HOLE_DEPTH)
             
         # Translate the result because it is now centered around the origin, which is inconvenient for subsequent steps
-        result = result.translate((BRICK_UNIT_SIZE/2, BRICK_UNIT_SIZE/2, BASE_BOTTOM_THICKNESS/2))
+        result = result.translate((BRICK_UNIT_SIZE_X/2, BRICK_UNIT_SIZE_Y/2, BASE_BOTTOM_THICKNESS/2))
                 
         return result
 
@@ -75,7 +75,7 @@ class SolidbinGenerator:
         
         for x in range(self.settings.sizeUnitsX):
             for y in range(self.settings.sizeUnitsY):
-                result.add(self.unit_base(basePlane).translate((x*GRID_UNIT_SIZE_MM, y*GRID_UNIT_SIZE_MM, 0)))
+                result.add(self.unit_base(basePlane).translate((x*GRID_UNIT_SIZE_X_MM, y*GRID_UNIT_SIZE_Y_MM, 0)))
         
         return result
 
@@ -116,7 +116,7 @@ class SolidbinGenerator:
 
                 result = result.edges(
                             cq.selectors.NearestToPointSelector((self.brickSizeX/2, self.brickSizeY/2, sizeZ*2))
-                        ).chamfer(thickness-EPSILON)
+                        ).chamfer(thickness-CHAMFER_EPSILON)
             
         return result
 

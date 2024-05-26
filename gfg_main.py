@@ -1,12 +1,16 @@
-from flask import Flask, render_template, send_file, after_this_request, request
+from flask import Flask, render_template, session, make_response, request
 from flask_bootstrap import Bootstrap4
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, SubmitField, BooleanField
 from wtforms.widgets import NumberInput
 from waitress import serve
-from gridfinity_constants import *
+from grid_constants import *
 from werkzeug.middleware.proxy_fix import ProxyFix
 from contextlib import contextmanager
+from dataclasses import dataclass
+
+import grid_constants
+from version import __version__
 
 import logging
 import os
@@ -34,23 +38,75 @@ logger = None
 GEN_FOLDER = "./generators"
 MAIN_MODULE = "main.py"
 
-# Handle POST and GET requests for "/"
-@app.route('/', methods=['GET', 'POST'])
-def index():
+# Handle GET requests for "/"
+@app.route('/', methods=['GET'])
+def index_get():
+
+    constants = grid_constants.Grid()
+
+    # If a grid spec cookie is found, set the values contained in it
+    if request.cookies.get('gridspec'):
+        values = request.cookies.get('gridspec').split(',')
+        constants.GRID_UNIT_SIZE_X_MM = float(values[0])
+        constants.GRID_UNIT_SIZE_Y_MM = float(values[1])
+        constants.HEIGHT_UNITSIZE_MM = float(values[2])
+
+    constants.recalculate() # Recalculate derived measures
+
+    form_list = []
+
+    # Create a list of forms to pass to Jinja for rendering
+    for gen in generators:
+        form_list.append(gen.get_form())
+
+    response = make_response(render_template('index.html', version=__version__, forms=form_list, message='', gridsize_x=constants.GRID_UNIT_SIZE_X_MM,
+                                             gridsize_y=constants.GRID_UNIT_SIZE_Y_MM, gridsize_z=constants.HEIGHT_UNITSIZE_MM))
+
+    if not request.cookies.get('gridspec'):
+        response.set_cookie('gridspec', str('{0},{1},{2}').format(constants.GRID_UNIT_SIZE_X_MM, constants.GRID_UNIT_SIZE_Y_MM, constants.HEIGHT_UNITSIZE_MM))
+    
+    return response
+
+# Handle POST requests for "/"
+@app.route('/', methods=['POST'])
+def index_post():
+    # Default gridspec
+    constants = grid_constants.Grid()
+
     message = ""
+
+    # Use the saved grid size if it was overridden
+    if request.cookies.get('gridspec'):
+        c = request.cookies.get('gridspec')
+        values = c.split(',')
+        constants.GRID_UNIT_SIZE_X_MM = float(values[0])
+        constants.GRID_UNIT_SIZE_Y_MM = float(values[1])
+        constants.HEIGHT_UNITSIZE_MM = float(values[2])
+        constants.recalculate()  # Recalculate derived measures
+
+
+    # If the request is from the form that specifies the grid size, override these values
+    if 'advanced_settings' in request.form:
+        # Save settings
+        constants.GRID_UNIT_SIZE_X_MM = float(request.form['gridSizeX'])
+        constants.GRID_UNIT_SIZE_Y_MM = float(request.form['gridSizeY'])
+        constants.HEIGHT_UNITSIZE_MM = float(request.form['gridSizeZ'])
+        constants.recalculate()  # Recalculate derived measures
 
     form_list = []
 
     for gen in generators:
-        # Create a list of forms to pass to Jinja for rendering
+        # Find the generator for this request
         f = gen.get_form()
         form_list.append(f)
-        # Check if this POST request comes from the form of this generator
         if gen.handles(request, f):
             # Generate an STL with the provided settings
-            return gen.process(f)
+            return gen.process(f, constants)
 
-    return render_template('index.html', forms=form_list, message=message)
+    response = make_response(render_template('index.html', version=__version__, forms=form_list, message=message, gridsize_x=constants.GRID_UNIT_SIZE_X_MM,
+                                             gridsize_y=constants.GRID_UNIT_SIZE_Y_MM, gridsize_z=constants.HEIGHT_UNITSIZE_MM))
+    response.set_cookie('gridspec', str('{0},{1},{2}').format(constants.GRID_UNIT_SIZE_X_MM, constants.GRID_UNIT_SIZE_Y_MM, constants.HEIGHT_UNITSIZE_MM))
+    return response
 
 # From this StackOverflow answer: https://stackoverflow.com/a/41904558
 @contextmanager
@@ -103,7 +159,7 @@ if __name__ == "__main__":
     debugMode = False if 'FLASK_DEBUG' not in os.environ else (os.environ['FLASK_DEBUG'] == 'True')
 
     generators = load_generators()
-    
+
     if debugMode:
         logger.info("Started in debug mode")
         port = int(os.environ.get('PORT', portNum))

@@ -1,11 +1,12 @@
 import cadquery as cq
 from cadquery import exporters
 from dataclasses import dataclass
-from gridfinity_constants import *
+from grid_constants import *
 
 class Generator:
-    def __init__(self, settings) -> None:
+    def __init__(self, settings, grid) -> None:
         self.settings = settings
+        self.grid = grid
 
         # Precalculate both before and after validation to process settings that changes
         self.precalculate()
@@ -14,48 +15,55 @@ class Generator:
 
     def precalculate(self):
         """Precalculate a number of useful derived values used in construction"""
-        self.brickSizeX = self.settings.sizeUnitsX * GRID_UNIT_SIZE_MM - BRICK_SIZE_TOLERANCE_MM 
-        self.brickSizeY = self.settings.sizeUnitsY * GRID_UNIT_SIZE_MM - BRICK_SIZE_TOLERANCE_MM
-        self.brickSizeZ = self.settings.sizeUnitsZ*HEIGHT_UNITSIZE_MM
-        self.internalSizeX = self.brickSizeX-2*WALL_THICKNESS
-        self.internalSizeY = self.brickSizeY-2*WALL_THICKNESS
+        self.brickSizeX = self.settings.sizeUnitsX * self.grid.GRID_UNIT_SIZE_X_MM - self.grid.BRICK_SIZE_TOLERANCE_MM  
+        self.brickSizeY = self.settings.sizeUnitsY * self.grid.GRID_UNIT_SIZE_Y_MM - self.grid.BRICK_SIZE_TOLERANCE_MM 
+        self.brickSizeZ = self.settings.sizeUnitsZ*self.grid.HEIGHT_UNITSIZE_MM
+        self.internalSizeX = self.brickSizeX-2*self.grid.WALL_THICKNESS
+        self.internalSizeY = self.brickSizeY-2*self.grid.WALL_THICKNESS
         self.compartmentSizeX = self.internalSizeX / self.settings.compartmentsX
         self.compartmentSizeY = self.internalSizeY / self.settings.compartmentsY
-        self.compartmentSizeZ = (self.settings.sizeUnitsZ-1)*HEIGHT_UNITSIZE_MM
+        self.compartmentSizeZ = (self.settings.sizeUnitsZ-1)*self.grid.HEIGHT_UNITSIZE_MM
 
     def unit_base(self, basePlane):
         """Construct a 1x1 GridFinity unit base on the provided workplane"""
         
         # The elements are constructed "centered" because that makes life easier. 
-        baseBottom = basePlane.box(BASE_BOTTOM_SIZE, BASE_BOTTOM_SIZE, BASE_BOTTOM_THICKNESS, combine=False)
+        baseBottom = basePlane.box(self.grid.BASE_BOTTOM_SIZE_X, self.grid.BASE_BOTTOM_SIZE_Y, self.grid.BASE_BOTTOM_THICKNESS, combine=False)
         baseBottom = baseBottom.edges("|Z").fillet(1.6)
-        baseBottom = baseBottom.faces("<Z").chamfer(0.8)
+        baseBottom = baseBottom.faces("<Z").chamfer(self.grid.BASE_BOTTOM_CHAMFER_SIZE)
         
         baseTop = baseBottom.faces(">Z").workplane()
-        baseTop = baseTop.box(BRICK_UNIT_SIZE, BRICK_UNIT_SIZE, BASE_TOP_THICKNESS, centered=(True, True, False), combine=False)
-        baseTop = baseTop.edges("|Z").fillet(CORNER_FILLET_RADIUS)
-        baseTop = baseTop.faces("<Z").chamfer(BASE_TOP_THICKNESS-EPSILON)
+        baseTop = baseTop.box(self.grid.BRICK_UNIT_SIZE_X, self.grid.BRICK_UNIT_SIZE_Y, self.grid.BASE_TOP_THICKNESS, centered=(True, True, False), combine=False)
+        baseTop = baseTop.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS)
+        baseTop = baseTop.faces("<Z").chamfer(self.grid.BASE_TOP_CHAMFER_SIZE)
         
         result = baseTop | baseBottom
         
         if self.settings.addMagnetHoles:
             result = result.faces("<Z").workplane()
-            result = result.pushPoints([(HOLE_OFFSET, HOLE_OFFSET),
-                                                (-HOLE_OFFSET, HOLE_OFFSET),
-                                                (HOLE_OFFSET, -HOLE_OFFSET),
-                                                (-HOLE_OFFSET, -HOLE_OFFSET)])
-            result = result.hole(MAGNET_HOLE_DIAMETER, MAGNET_HOLE_DEPTH)
+            result = result.pushPoints([(self.grid.HOLE_OFFSET_X, self.grid.HOLE_OFFSET_Y),
+                                                (-self.grid.HOLE_OFFSET_X, self.grid.HOLE_OFFSET_Y),
+                                                (self.grid.HOLE_OFFSET_X, -self.grid.HOLE_OFFSET_Y),
+                                                (-self.grid.HOLE_OFFSET_X, -self.grid.HOLE_OFFSET_Y)])
+            result = result.hole(self.settings.magnetHoleDiameter, self.grid.DEFAULT_MAGNET_HOLE_DEPTH)
+
+            if self.settings.addRemovalHoles:
+                result = result.pushPoints([(self.grid.HOLE_OFFSET_X-self.grid.REMOVABLE_MAGNET_HOLE_OFFSET, self.grid.HOLE_OFFSET_Y-self.grid.REMOVABLE_MAGNET_HOLE_OFFSET),
+                                                (-self.grid.HOLE_OFFSET_X+self.grid.REMOVABLE_MAGNET_HOLE_OFFSET, self.grid.HOLE_OFFSET_Y-self.grid.REMOVABLE_MAGNET_HOLE_OFFSET),
+                                                (self.grid.HOLE_OFFSET_X-self.grid.REMOVABLE_MAGNET_HOLE_OFFSET, -self.grid.HOLE_OFFSET_Y+self.grid.REMOVABLE_MAGNET_HOLE_OFFSET),
+                                                (-self.grid.HOLE_OFFSET_X+self.grid.REMOVABLE_MAGNET_HOLE_OFFSET, -self.grid.HOLE_OFFSET_Y+self.grid.REMOVABLE_MAGNET_HOLE_OFFSET)])
+                result = result.hole(self.grid.REMOVABLE_MAGNET_HOLE_DIAMETER, self.grid.DEFAULT_MAGNET_HOLE_DEPTH)
 
         if self.settings.addScrewHoles:
             result = result.faces("<Z").workplane()
-            result = result.pushPoints([(HOLE_OFFSET, HOLE_OFFSET),
-                                        (-HOLE_OFFSET, HOLE_OFFSET),
-                                        (HOLE_OFFSET, -HOLE_OFFSET),
-                                        (-HOLE_OFFSET, -HOLE_OFFSET)])
-            result = result.hole(SCREW_HOLE_DIAMETER, SCREW_HOLE_DEPTH)
+            result = result.pushPoints([(self.grid.HOLE_OFFSET_X, self.grid.HOLE_OFFSET_Y),
+                                        (-self.grid.HOLE_OFFSET_X, self.grid.HOLE_OFFSET_Y),
+                                        (self.grid.HOLE_OFFSET_X, -self.grid.HOLE_OFFSET_Y),
+                                        (-self.grid.HOLE_OFFSET_X, -self.grid.HOLE_OFFSET_Y)])
+            result = result.hole(self.grid.SCREW_HOLE_DIAMETER, self.grid.SCREW_HOLE_DEPTH)
             
         # Translate the result because it is now centered around the origin, which is inconvenient for subsequent steps
-        result = result.translate((BRICK_UNIT_SIZE/2, BRICK_UNIT_SIZE/2, BASE_BOTTOM_THICKNESS/2))
+        result = result.translate((self.grid.BRICK_UNIT_SIZE_X/2, self.grid.BRICK_UNIT_SIZE_Y/2, self.grid.BASE_BOTTOM_THICKNESS/2))
                 
         return result
 
@@ -66,16 +74,16 @@ class Generator:
         
         for x in range(self.settings.sizeUnitsX):
             for y in range(self.settings.sizeUnitsY):
-                result.add(self.unit_base(basePlane).translate((x*GRID_UNIT_SIZE_MM, y*GRID_UNIT_SIZE_MM, 0)))
+                result.add(self.unit_base(basePlane).translate((x*self.grid.GRID_UNIT_SIZE_X_MM, y*self.grid.GRID_UNIT_SIZE_Y_MM, 0)))
         
         return result
 
     def brick_floor(self, basePlane):
         """Create a floor covering all unit bases"""
 
-        floor = basePlane.box(self.brickSizeX, self.brickSizeY, FLOOR_THICKNESS, centered = False, combine = False)
+        floor = basePlane.box(self.brickSizeX, self.brickSizeY, self.grid.FLOOR_THICKNESS, centered = False, combine = False)
         
-        floor = floor.edges("|Z").fillet(CORNER_FILLET_RADIUS)
+        floor = floor.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS)
 
         return floor
 
@@ -85,12 +93,12 @@ class Generator:
         sizeZ = self.compartmentSizeZ
 
         if self.settings.addStackingLip:
-            sizeZ = sizeZ + STACKING_LIP_HEIGHT
+            sizeZ = sizeZ + self.grid.STACKING_LIP_HEIGHT
 
         wall = basePlane.box(self.brickSizeX, self.brickSizeY, sizeZ, centered=False, combine = False)
         
-        thickness = WALL_THICKNESS
-        wall = wall.edges("|Z").fillet(CORNER_FILLET_RADIUS)
+        thickness = self.grid.WALL_THICKNESS
+        wall = wall.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS)
 
         cutout = (
                     basePlane.center(thickness, thickness)
@@ -98,22 +106,22 @@ class Generator:
                 )
 
         # If the walls are thicker than the outside radius of the corners, skip the fillet
-        if thickness < CORNER_FILLET_RADIUS:
-            cutout = cutout.edges("|Z").fillet(CORNER_FILLET_RADIUS-thickness)
+        if thickness < self.grid.CORNER_FILLET_RADIUS:
+            cutout = cutout.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS-thickness)
         
         result = wall-cutout
         
         if self.settings.addStackingLip:
             result = result.edges(
                         cq.selectors.NearestToPointSelector((self.brickSizeX/2, self.brickSizeY/2, sizeZ*2))
-                    ).chamfer(thickness-EPSILON)
+                    ).chamfer(thickness-self.grid.CHAMFER_EPSILON)
             
         return result
 
     def divider_walls(self, basePlane):
         """Create a regularly spaced grid of internal divider walls"""
         
-        resultPlane = basePlane.center(WALL_THICKNESS, WALL_THICKNESS)
+        resultPlane = basePlane.center(self.grid.WALL_THICKNESS, self.grid.WALL_THICKNESS)
         result = resultPlane.workplane()
         
         if(self.settings.compartmentsX > 1):
@@ -140,7 +148,7 @@ class Generator:
         numRidges = self.settings.compartmentsY if self.settings.multiLabel else 1
 
         for x in range(numRidges):
-            startX = WALL_THICKNESS + x*self.compartmentSizeY
+            startX = self.grid.WALL_THICKNESS + x*self.compartmentSizeY
             result.add(
                 basePlane.sketch()
                 .segment((startX,self.brickSizeZ-self.settings.labelRidgeWidth),(startX,self.brickSizeZ))
@@ -160,16 +168,16 @@ class Generator:
 
         result = basePlane.workplane()
 
-        # To ensure the curve fits, take the smallest of: The height of the divider walls, the length of a compartment, half the brick unit-size
-        radius = min((self.settings.sizeUnitsZ-1) * HEIGHT_UNITSIZE_MM, self.compartmentSizeY, BRICK_UNIT_SIZE/2)
+        # To ensure the curve fits, take the smallest of: The height of the divider walls, the length of a compartment, half the brick unit-size (Y-direction)
+        radius = min((self.settings.sizeUnitsZ-1) * self.grid.HEIGHT_UNITSIZE_MM, self.compartmentSizeY, self.grid.BRICK_UNIT_SIZE_Y/2)
         
         for y in range(self.settings.compartmentsY):
-            startX = WALL_THICKNESS + (y+1)*self.compartmentSizeY
+            startX = self.grid.WALL_THICKNESS + (y+1)*self.compartmentSizeY
             result.add(
                 basePlane.sketch()
-                .segment((startX,HEIGHT_UNITSIZE_MM+radius),(startX,HEIGHT_UNITSIZE_MM))
-                .segment((startX-radius,HEIGHT_UNITSIZE_MM))
-                .arc((startX-radius,HEIGHT_UNITSIZE_MM+radius),radius,270,90)
+                .segment((startX,self.grid.HEIGHT_UNITSIZE_MM+radius),(startX,self.grid.HEIGHT_UNITSIZE_MM))
+                .segment((startX-radius,self.grid.HEIGHT_UNITSIZE_MM))
+                .arc((startX-radius,self.grid.HEIGHT_UNITSIZE_MM+radius),radius,270,90)
                 .assemble()
                 .finalize()
                 .extrude(self.internalSizeX)
@@ -181,14 +189,14 @@ class Generator:
         """Do some sanity checking on the settings to prevent impossible or unreasonable results"""
 
         # Cap the size in grid-units to avoid thrashing the server
-        self.settings.sizeUnitsX = min(self.settings.sizeUnitsX, MAX_GRID_UNITS)
-        self.settings.sizeUnitsY = min(self.settings.sizeUnitsY, MAX_GRID_UNITS)
-        self.settings.sizeUnitsZ = min(self.settings.sizeUnitsZ, MAX_HEIGHT_UNITS)
-        self.settings.sizeUnitsZ = max(self.settings.sizeUnitsZ, MIN_HEIGHT_UNITS)
+        self.settings.sizeUnitsX = min(self.settings.sizeUnitsX, self.grid.MAX_GRID_UNITS)
+        self.settings.sizeUnitsY = min(self.settings.sizeUnitsY, self.grid.MAX_GRID_UNITS)
+        self.settings.sizeUnitsZ = min(self.settings.sizeUnitsZ, self.grid.MAX_HEIGHT_UNITS)
+        self.settings.sizeUnitsZ = max(self.settings.sizeUnitsZ, self.grid.MIN_HEIGHT_UNITS)
 
         # Limit the number of compartment in each direction
-        self.settings.compartmentsX = min(self.settings.compartmentsX, self.settings.sizeUnitsX*MAX_COMPARTMENTS_PER_GRID_UNIT)
-        self.settings.compartmentsY = min(self.settings.compartmentsY, self.settings.sizeUnitsY*MAX_COMPARTMENTS_PER_GRID_UNIT)
+        self.settings.compartmentsX = min(self.settings.compartmentsX, self.settings.sizeUnitsX*self.grid.MAX_COMPARTMENTS_PER_GRID_UNIT)
+        self.settings.compartmentsY = min(self.settings.compartmentsY, self.settings.sizeUnitsY*self.grid.MAX_COMPARTMENTS_PER_GRID_UNIT)
 
         # Ensure the labeltab is smaller than half the compartmentsize, or it will close off a row
         self.settings.labelRidgeWidth = min(self.compartmentSizeY/2, self.settings.labelRidgeWidth)
@@ -219,7 +227,7 @@ class Generator:
         result.add(self.divider_walls(plane))
 
         # Continue from the left-most outside face of the brick
-        plane = cq.Workplane("YZ").workplane(offset=WALL_THICKNESS)
+        plane = cq.Workplane("YZ").workplane(offset=self.grid.WALL_THICKNESS)
 
         # Add the grabbing/label tab
         if self.settings.addLabelRidge:

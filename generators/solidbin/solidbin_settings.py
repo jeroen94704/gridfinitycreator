@@ -9,4 +9,6 @@ class Settings:
 
     addStackingLip: bool = True  # Add a stacking lip (True) or not (False)?
     addMagnetHoles: bool = True  # Add holes for magnets
-    addScrewHoles:  bool = True  # Add holes for screws
+    addScrewHoles:  bool = True  # Add holes for screws    
+    magnetHoleDiameter: float = 6.5 # Diameter of magnet holes
+    addRemovalHoles: bool = False # Add an extra magnet-removal hole to each magnet hole

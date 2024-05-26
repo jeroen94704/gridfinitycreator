@@ -11,7 +11,6 @@ class Settings:
     compartmentsY: int = 1 # The number of compartments in the Y (length) direction 
 
     addStackingLip: bool = True  # Add a stacking lip (True) or not (False)?
-    addGrabCurve:   bool = True  # Add a curved floor to easily get parts out of the bin
     addLabelRidge:  bool = True  # Add a ridge to pick up the bin and attach a label
     multiLabel:     bool = False # Add a ridge to every row of compartments?
 

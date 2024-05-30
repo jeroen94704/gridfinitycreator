@@ -18,6 +18,8 @@ services:
 #      - 5000:5000
     env_file:
       - .env.container
+    volumes:
+      - ${DATA_ROOT:?error}/gridfinitycreator/logs:/logs
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.gridfinity.rule=Host(`${GFG_DOMAIN:?error}`)"

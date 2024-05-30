@@ -21,7 +21,6 @@ app = Flask(__name__)
 
 # Flask-WTF requires an encryption key - the string can be anything
 app.config['SECRET_KEY'] = 'hPqPfz!y=moJ!MVO{*tqQO$_Itoo:'
-app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'flatly'
 
 # Apply proxy fix
 app.wsgi_app = ProxyFix(
@@ -32,7 +31,7 @@ app.wsgi_app = ProxyFix(
 Bootstrap4(app)
 
 generators = []
-logger = None
+logger = logging.getLogger('GFG')
 
 # Constants
 GEN_FOLDER = "./generators"
@@ -153,10 +152,9 @@ def load_generators():
     return generators
 
 if __name__ == "__main__":
-    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.DEBUG)
-    logger = logging.getLogger('GFG')
     portNum = 5000 if 'FLASK_PORT' not in os.environ else os.environ['FLASK_PORT']
     debugMode = False if 'FLASK_DEBUG' not in os.environ else (os.environ['FLASK_DEBUG'] == 'True')
+    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.DEBUG if debugMode else logging.INFO)
 
     generators = load_generators()
 

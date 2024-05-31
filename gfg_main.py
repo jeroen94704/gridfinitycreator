@@ -3,7 +3,7 @@ from flask_bootstrap import Bootstrap4
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, SubmitField, BooleanField
 from wtforms.widgets import NumberInput
-from waitress import serve
+import waitress
 from grid_constants import *
 from werkzeug.middleware.proxy_fix import ProxyFix
 from contextlib import contextmanager
@@ -13,6 +13,7 @@ import grid_constants
 from version import __version__
 
 import logging
+import logging.handlers
 import os
 import importlib
 import sys
@@ -21,7 +22,6 @@ app = Flask(__name__)
 
 # Flask-WTF requires an encryption key - the string can be anything
 app.config['SECRET_KEY'] = 'hPqPfz!y=moJ!MVO{*tqQO$_Itoo:'
-app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'flatly'
 
 # Apply proxy fix
 app.wsgi_app = ProxyFix(
@@ -101,6 +101,7 @@ def index_post():
         form_list.append(f)
         if gen.handles(request, f):
             # Generate an STL with the provided settings
+            logger.info("Generating {0} for: {1}".format(f.get_title(), request.remote_addr))
             return gen.process(f, constants)
 
     response = make_response(render_template('index.html', version=__version__, forms=form_list, message=message, gridsize_x=constants.GRID_UNIT_SIZE_X_MM,
@@ -134,7 +135,7 @@ def load_generators():
         if not os.path.isdir(location) or not MAIN_MODULE in os.listdir(location):
             continue
 
-        logger.info("Loading generator {0}".format(entry))
+        logger.debug("Loading generator {0}".format(entry))
         fname = "{0}/{1}".format(location, MAIN_MODULE)
 
         # Temporarily expand the search path for modules, so the (sub-)modules needed
@@ -152,11 +153,34 @@ def load_generators():
 
     return generators
 
+class serverFilter():
+    def filter(self, record):
+        return (record.name != 'werkzeug') and (record.name != 'waitress')
+
 if __name__ == "__main__":
-    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.DEBUG)
-    logger = logging.getLogger('GFG')
     portNum = 5000 if 'FLASK_PORT' not in os.environ else os.environ['FLASK_PORT']
     debugMode = False if 'FLASK_DEBUG' not in os.environ else (os.environ['FLASK_DEBUG'] == 'True')
+
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+
+    # Configure console logger        
+    console = logging.StreamHandler()
+    console.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+    console.setFormatter(formatter)
+    console.addFilter(serverFilter())
+    root.addHandler(console)
+
+    # Configure rotating file logger
+    fh = logging.handlers.RotatingFileHandler('/logs/access.log', maxBytes=1000000, backupCount=10)
+    fh.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s: %(message)s')
+    fh.setFormatter(formatter)
+    fh.addFilter(serverFilter())
+    root.addHandler(fh)
+
+    logger = logging.getLogger('GFG')
 
     generators = load_generators()
 
@@ -166,4 +190,4 @@ if __name__ == "__main__":
         app.run(debug=True, host='0.0.0.0', port=port)
     else:
         logger.info("Started in production mode")
-        serve(app, listen='*:' + str(portNum))
+        waitress.serve(app, listen='*:' + str(portNum), threads=6)

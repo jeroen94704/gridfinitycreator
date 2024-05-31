@@ -7,6 +7,9 @@ import grid_constants
 
 import uuid
 import os
+import logging
+
+logger = logging.getLogger('CBG')
 
 def process(form, constants):
     # Copy the settings from the form
@@ -45,9 +48,12 @@ def process(form, constants):
     def delete_image(response):
         try:
             os.remove(filename)
+            logger.debug("Removed temp file {0}".format(filename))
         except Exception as ex:
-            print(ex)
+            logger.critical(ex)
         return response
+
+    logger.info(s)
 
     # Send the generated STL file to the client
     downloadName = "Divider Bin {0}x{1}x{2} {3}x{4} Compartments.{5}".format(s.sizeUnitsX, s.sizeUnitsY, s.sizeUnitsZ, s.compartmentsX, s.compartmentsY, form.exportFormat.data)

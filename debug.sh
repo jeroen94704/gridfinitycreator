@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker-compose -f docker-compose.debug.yml up -d --build
+docker-compose --env-file ./.env.container -f docker-compose.debug.yml up -d --build

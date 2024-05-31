@@ -1,15 +1,12 @@
 from flask import send_file, Flask, after_this_request
 
-import solidbin_generator as generator
-import solidbin_form as form
-import solidbin_settings as settings
+import generators.holeybin.holeybin_generator as generator
+import generators.holeybin.holeybin_form as form
+import generators.holeybin.holeybin_settings as settings
 import grid_constants
 
 import uuid
 import os
-import logging
-
-logger = logging.getLogger('SBG')
 
 def get_generator(settings):
     return generator.Generator(settings)
@@ -22,10 +19,8 @@ def process(form, constants):
     s.sizeUnitsZ = form.sizeUnitsZ.data
     s.addStackingLip = form.addStackingLip.data
     s.addMagnetHoles = form.addMagnetHoles.data
-    s.magnetHoleDiameter = float(form.magnetHoleDiameter.data)
-    s.addRemovalHoles = form.addRemovalHoles.data
     s.addScrewHoles = form.addScrewHoles.data
-    
+
     # Default grid (Gridfinity)
     if not constants:
         g = grid_constants.Grid()
@@ -33,7 +28,7 @@ def process(form, constants):
         g = constants
     
     # Construct the names for the temporary and downloaded file
-    filename = "/tmpfiles/" + str(uuid.uuid4()) + "." + form.exportFormat.data
+    filename = "/tmpfiles/" + str(uuid.uuid4()) + ".stl"
 
     # Generate the STL file
     gen = generator.Generator(s, g)
@@ -48,10 +43,8 @@ def process(form, constants):
             print(ex)
         return response
 
-    logger.info(s)
-
     # Send the generated STL file to the client
-    downloadName = "Solid Bin {0}x{1}x{2}.{3}".format(s.sizeUnitsX, s.sizeUnitsY, s.sizeUnitsZ, form.exportFormat.data)
+    downloadName = "HoleyBin_{0}x{1}x{2}_{3}_{4}x{5}.stl".format(s.sizeUnitsX, s.sizeUnitsY, s.sizeUnitsZ, s.holeShape, s.numHolesX, s.numHolesY)
     return send_file(filename, as_attachment=True, download_name=downloadName)
 
 def get_form():

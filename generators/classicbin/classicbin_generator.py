@@ -2,6 +2,9 @@ import cadquery as cq
 from cadquery import exporters
 from dataclasses import dataclass
 from grid_constants import *
+import logging
+
+logger = logging.getLogger('CBG')
 
 class Generator:
     def __init__(self, settings, grid) -> None:
@@ -244,6 +247,7 @@ class Generator:
 
     def generate_stl(self, filename):
         model = self.generate_model()
+        logger.debug("Saved classicbin to {0}".format(filename))
         exporters.export(model, filename)
 
 

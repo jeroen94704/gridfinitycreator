@@ -10,15 +10,17 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Amsterdam
+    environment:
+      FLASK_PORT: 5001
+      FLASK_DEBUG: "True"
     restart: unless-stopped
     networks:
       - proxy
     ports:
       - 5001:5001
-    environment:
-      FLASK_PORT: 5001
-      FLASK_DEBUG: "True"
-
+    volumes:
+      - ${DATA_ROOT:?error}/gridfinitycreator/debug_logs:/logs
+      
 networks:
   proxy:
     external: true

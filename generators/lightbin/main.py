@@ -7,6 +7,9 @@ import grid_constants
 
 import uuid
 import os
+import logging
+
+logger = logging.getLogger('LBG')
 
 def get_generator(settings):
     return generator.Generator(settings)
@@ -40,6 +43,8 @@ def process(form, constants):
         except Exception as ex:
             print(ex)
         return response
+
+    logger.info(s)
 
     # Send the generated STL file to the client
     downloadName = "Light divider bin {0}x{1}x{2}.{3}".format(s.sizeUnitsX, s.sizeUnitsY, s.sizeUnitsZ, form.exportFormat.data)

@@ -32,7 +32,7 @@ class Generator:
         
         # The elements are constructed "centered" because that makes life easier. 
         baseBottom = basePlane.box(self.grid.BASE_BOTTOM_SIZE_X, self.grid.BASE_BOTTOM_SIZE_Y, self.grid.BASE_BOTTOM_THICKNESS, combine=False)
-        baseBottom = baseBottom.edges("|Z").fillet(1.6)
+        baseBottom = baseBottom.edges("|Z").fillet(self.grid.BASE_BOTTOM_FILLET_RADIUS)
         baseBottom = baseBottom.faces("<Z").chamfer(self.grid.BASE_BOTTOM_CHAMFER_SIZE)
         
         baseTop = baseBottom.faces(">Z").workplane()

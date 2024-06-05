@@ -30,7 +30,7 @@ class Generator:
         
         baseTop = baseBottom.faces(">Z").workplane()
         baseTop = baseTop.box(self.grid.BRICK_UNIT_SIZE_X, self.grid.BRICK_UNIT_SIZE_Y, self.grid.BASE_TOP_THICKNESS, centered=(True, True, False), combine=False)
-        baseTop = baseTop.edges("|Z").fillet(self.grid.BASE_TOP_FILLET_RADIUS)
+        baseTop = baseTop.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS)
         baseTop = baseTop.faces("<Z").chamfer(self.grid.BASE_TOP_CHAMFER_SIZE)
         
         result = baseTop | baseBottom
@@ -42,7 +42,13 @@ class Generator:
                                                 (self.grid.HOLE_OFFSET_X, -self.grid.HOLE_OFFSET_Y),
                                                 (-self.grid.HOLE_OFFSET_X, -self.grid.HOLE_OFFSET_Y)])
             result = result.hole(self.grid.DEFAULT_MAGNET_HOLE_DIAMETER, self.grid.DEFAULT_MAGNET_HOLE_DEPTH)
-
+            if self.settings.addRemovalHoles:
+                result = result.pushPoints([(self.grid.HOLE_OFFSET_X-self.grid.REMOVABLE_MAGNET_HOLE_OFFSET, self.grid.HOLE_OFFSET_Y-self.grid.REMOVABLE_MAGNET_HOLE_OFFSET),
+                                                (-self.grid.HOLE_OFFSET_X+self.grid.REMOVABLE_MAGNET_HOLE_OFFSET, self.grid.HOLE_OFFSET_Y-self.grid.REMOVABLE_MAGNET_HOLE_OFFSET),
+                                                (self.grid.HOLE_OFFSET_X-self.grid.REMOVABLE_MAGNET_HOLE_OFFSET, -self.grid.HOLE_OFFSET_Y+self.grid.REMOVABLE_MAGNET_HOLE_OFFSET),
+                                                (-self.grid.HOLE_OFFSET_X+self.grid.REMOVABLE_MAGNET_HOLE_OFFSET, -self.grid.HOLE_OFFSET_Y+self.grid.REMOVABLE_MAGNET_HOLE_OFFSET)])
+                result = result.hole(self.grid.REMOVABLE_MAGNET_HOLE_DIAMETER, self.grid.DEFAULT_MAGNET_HOLE_DEPTH)
+                
         if self.settings.addScrewHoles:
             result = result.faces("<Z").workplane()
             result = result.pushPoints([(self.grid.HOLE_OFFSET_X, self.grid.HOLE_OFFSET_Y),

@@ -18,7 +18,7 @@ class Grid:
     BRICK_SIZE_TOLERANCE_MM: float = 0.5
     BASE_BOTTOM_THICKNESS: float = 2.6
     BASE_BOTTOM_CHAMFER_SIZE: float = 0.8
-    BASE_BOTTOM_FILLET_RADIUS: float = 3.75
+    BASE_BOTTOM_FILLET_RADIUS: float = 1.6
     BASE_TOP_THICKNESS: float = 2.15
     BASE_TOP_FILLET_RADIUS: float = 3.75
     FLOOR_THICKNESS: float = 2.25 # This thickness makes the base exactly 1 height unit high

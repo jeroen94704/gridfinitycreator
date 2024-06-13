@@ -4,10 +4,11 @@ This application generates STL or STEP files of configurable Gridfinity compatib
 
 ## Available components
 
-There are currently a few components available, listed below. A baseplate generator is in the works, and maybe more in the future.
+There are currently a few components available, listed below. Other components are in the works.
 
+- Baseplate: Basic baseplate without screws, magnets or weighting.
 - Divider bin: Standard divider bin very similar to Zack's original design. 
-- Light bin: A light version of the normal Gridfinity bin that saves plastic and offers more room. This means magnets and/or screws are not possible
+- Light bin: A light version of the normal Gridfinity bin that saves plastic and offers more room. This means there is no room for magnets and/or screws
 - Solid bin: A completely filled solid Gridfinity bin which can be used as a starting point for custom bins
 
 ## Online generator

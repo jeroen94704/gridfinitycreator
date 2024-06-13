@@ -20,9 +20,10 @@ The generator runs as a web-application in a docker container. To run your own i
 
 - [Download and unzip the code](https://github.com/jeroen94704/klepcbgen/archive/master.zip) or clone the repository: `git clone https://github.com/jeroen94704/gridfinitycreator`
 - cd into the source directory
-- Install the required dependencies:`pip install -r requirements.txt` 
 - Build the Docker Image: `./build.sh`
 - Start the server: `./deploy.sh`
+
+You may have to run the above commands as root (e.g. using "sudo")
 
 ## Debug mode
 

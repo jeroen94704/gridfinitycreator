@@ -50,14 +50,16 @@
             </p>
           </div>
 
-          <h5>Grid units</h5>
+          <h5>Alternatives</h5>
 
-          <p>The <a src="https://gridfinity.xyz/specification/">Gridfinity Design Reference</a> specifies the following
-            grid unit sizes:</p>
+          <p>There are quite a few other Gridfinity generators available, both online and offline, each with their own advantages and use-cases. The ones I know about are:</p>
 
           <ul>
-            <li>Length, Width: 42mm</li>
-            <li>Height: 7mm (with a minimum height of 2 units, including the base)</li>
+            <li><a href="https://gridfinity.perplexinglabs.com/">Online generator with a nice preview, by perplexinglabs</a></li>
+            <li><a href="https://vector76.github.io/Web_OpenSCAD_Customizer/gridfinity_bins.html">Onlnie generator, based on an OpenSCAD implementation</a></li>
+            <li><a href="https://apps.autodesk.com/FUSION/en/Detail/Index?id=7197558650811789">A Fusion360 Gridfinity App</a></li>
+            <li><a href="https://github.com/michaelgale/cq-gridfinity">A python library to build Gridfinity objects</a></li>
+            <li><a href="https://www.printables.com/@jdegs/collections/154274">Several Gridfinity generators by Printables user @jdegs</a></li>
           </ul>
         </div>
       </div>
@@ -192,12 +194,10 @@
 </div>
 <div class="row text-center pb-4">
   <div class="col fw-lighter fs-6 text-secondary">
-    Gridfinity Creator v{{version}}. &copy;2024 Jeroen Bouwens. Source code:
-      <a href="https://github.com/jeroen94704/gridfinitycreator">GitHub</a>. Contact:
-      <a href="https://fosstodon.org/@jeroen94704">Mastodon</a> or 
-      <a href="https://discord.com/users/303964784984850433">Discord</a>. Made with 
-      <a href="https://getbootstrap.com/">Bootstrap 5</a> and the 
-      <a href="https://bootswatch.com/flatly/">Bootswatch/Flatly</a> theme.
+    <p>Gridfinity Creator v{{version}}. &copy;2024 Jeroen Bouwens.</p>
+      <p><a class="fw-lighter" href="https://github.com/jeroen94704/gridfinitycreator">Source</a>. 
+      <a href="https://discord.gg/fBb2gpzKca">Discord</a>. <a href="https://bootswatch.com/flatly/">Theme</a>. 
+      <a href="https://ko-fi.com/jeroen94704">Donate</a>.</p>
   </div>
 </div>
 
@@ -213,9 +213,12 @@
 
 <script>
     document.body.addEventListener('click', event => {
+      // Only respond to help buttons
       if (!event.target.matches('.help-button')) {
         return;
       }
+
+      // Check if there is any content present inside the (hidden) content block
       const sourceModalElement = document.getElementById('help-modal');
       const sourceModal = bootstrap.Modal.getOrCreateInstance(sourceModalElement);
       helpText = event.target.querySelector('[id^="content"]').innerHTML;
@@ -224,6 +227,7 @@
       {
         helpText = "There is no extra information available for this field"
       }
+
       sourceModalElement.querySelector('p').innerHTML = helpText
  
       sourceModal.show();

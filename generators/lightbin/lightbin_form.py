@@ -3,6 +3,7 @@ from wtforms import IntegerField, SelectField, BooleanField
 from wtforms.widgets import NumberInput
 from grid_constants import *
 import os
+import help_provider as help
 
 class Form(FlaskForm):
     id = "lightbin"
@@ -14,7 +15,12 @@ class Form(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+        self.sizeUnitsX.description = help.get_size_help()
+        self.sizeUnitsY.description = help.get_size_help()
+        self.sizeUnitsZ.description = help.get_size_help()
+        self.addStackingLip.description = help.get_stackinglip_help()
+        self.exportFormat.description = help.get_exportformat_help()
+
     def get_rows(self):
         return [
             ["Size", [self.sizeUnitsX, self.sizeUnitsY, self.sizeUnitsZ]],

@@ -44,7 +44,7 @@ class Grid:
 
     # Some limits for sanity checking the inputs
     MAX_COMPARTMENTS_PER_GRID_UNIT: float = 3
-    MAX_GRID_UNITS: float = 6
+    MAX_GRID_UNITS: float = 8
     MAX_HEIGHT_UNITS: float = 12
     MIN_HEIGHT_UNITS: float = 2 # A height of 1 unit would be just the base without anything on top
 

@@ -19,7 +19,7 @@ If you don't know how to run your own server (or simply don't want to), there sh
 
 The generator runs as a web-application in a docker container. To run your own instance, perform the following steps from the command line:
 
-- [Download and unzip the code](https://github.com/jeroen94704/klepcbgen/archive/master.zip) or clone the repository: `git clone https://github.com/jeroen94704/gridfinitycreator`
+- [Download and unzip the code](https://github.com/jeroen94704/gridfinitycreator/releases/latest) or clone the repository: `git clone https://github.com/jeroen94704/gridfinitycreator`
 - cd into the source directory
 - Build the Docker Image: `./build.sh`
 - Start the server: `./deploy.sh`

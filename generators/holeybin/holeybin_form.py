@@ -14,7 +14,6 @@ class Form(FlaskForm):
     holeShape      = SelectField("Shape", choices=[(HoleShape.CIRCLE, "Circle"), (HoleShape.HEAXAGON, "Hexagon"), (HoleShape.SQUARE, "Square")])
     holeDiameter   = DecimalField("Diameter", default = 4.0, places = 2)
     keepoutDiameter = DecimalField("Keepout diameter", default = 4.0, places = 2)
-
     addStackingLip  = BooleanField("Stacking lip", default="checked", false_values=(False, "false", ""))
     addMagnetHoles  = BooleanField("Magnet holes", default="true", false_values=(False, "false", ""))
     magnetHoleDiameter = DecimalField("Magnet-hole diameter", default = 6.5, places = 2)

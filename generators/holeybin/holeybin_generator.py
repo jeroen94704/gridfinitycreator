@@ -118,11 +118,21 @@ class Generator:
 
             return result
         
-    def holey_grid(self, body, basePlane):
-        result = body
+    def holey_grid(self, basePlane):
+
+        x_step = self.internalSizeX / self.settings.numHolesX
+        y_step = self.internalSizeY / self.settings.numHolesY
+        
+        offset_x = (self.brickSizeX - self.internalSizeX) / 2 + x_step / 2
+        offset_y = (self.brickSizeY - self.internalSizeY) / 2 + y_step / 2
+
+        hole_points = []
         for x in range(self.settings.numHolesX):
             for y in range(self.settings.numHolesY):
-                result = result + (basePlane.box(self.settings.holeDiameter, self.settings.holeDiameter, self.settings.holeDepth).translate((x*self.settings.keepoutDiameter, y*self.settings.keepoutDiameter, -self.settings.holeDepth+0.1)))
+                hole_points.append((x*x_step + offset_x, y*y_step + offset_y))
+                
+#        result = basePlane.pushPoints(hole_points).hole(self.settings.holeDiameter, self.settings.holeDepth)
+        result = basePlane.pushPoints(hole_points).polygon(6, self.settings.holeDiameter).extrude(-self.settings.holeDepth, combine="cut")
         
         return result
 
@@ -160,7 +170,7 @@ class Generator:
         result.add(self.stacking_lip(plane))
 
         # Create the hole-grid in the same plane as the previous operation
-        self.holey_grid(result, plane)
+        result = self.holey_grid(plane)
 
         # Combine everything together
         result = result.combine(clean=True)

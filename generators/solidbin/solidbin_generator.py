@@ -85,6 +85,10 @@ class Generator:
     def outer_wall(self, basePlane):
         """Create the outer wall of the bin"""
 
+        # Handle the case when the user wants to generate just the base with nothing on it
+        if self.compartmentSizeZ == 0:
+            return 
+        
         sizeZ = self.compartmentSizeZ
 
         if self.settings.addStackingLip:

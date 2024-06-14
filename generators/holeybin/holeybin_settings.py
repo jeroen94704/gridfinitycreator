@@ -15,7 +15,6 @@ class Settings:
     holeShape: HoleShape = HoleShape.CIRCLE # The shape of the hole to use
     holeDiameter: float = 4.0 # Diameter of the hole
     holeDepth: float = 5.0 # Depth of the holes
-    keepoutShape: HoleShape = HoleShape.CIRCLE
     keepoutDiameter: float = 6.0 # Diameter of the keepout area
 
     addStackingLip: bool = True  # Add a stacking lip (True) or not (False)?

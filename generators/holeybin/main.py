@@ -22,7 +22,6 @@ def process(form, constants):
     s.holeShape = form.holeShape.data
     s.holeDiameter = float(form.holeDiameter.data)
     s.holeDepth      = float(form.holeDepth.data)
-    s.keepoutShape      = form.keepoutShape.data
     s.keepoutDiameter   = float(form.keepoutDiameter.data)
 
     s.addStackingLip = form.addStackingLip.data
@@ -65,5 +64,6 @@ def get_form():
 def handles(request, form):
     if form.id in request.form and form.validate_on_submit():
         return True
-    
+
     return False
+

@@ -13,8 +13,7 @@ class Form(FlaskForm):
     holeDepth      = DecimalField("Depth", default = 5.0, places = 2)
     holeShape      = SelectField("Shape", choices=[(HoleShape.CIRCLE, "Circle"), (HoleShape.HEAXAGON, "Hexagon"), (HoleShape.SQUARE, "Square")])
     holeDiameter   = DecimalField("Diameter", default = 4.0, places = 2)
-    keepoutShape   = SelectField("Shape", choices=[(HoleShape.CIRCLE, "Circle"), (HoleShape.HEAXAGON, "Hexagon"), (HoleShape.SQUARE, "Square")])
-    keepoutDiameter = DecimalField("Diameter", default = 4.0, places = 2)
+    keepoutDiameter = DecimalField("Keepout diameter", default = 4.0, places = 2)
 
     addStackingLip  = BooleanField("Stacking lip", default="checked", false_values=(False, "false", ""))
     addMagnetHoles  = BooleanField("Magnet holes", default="true", false_values=(False, "false", ""))
@@ -30,8 +29,7 @@ class Form(FlaskForm):
     def get_rows(self):
         return [
             ["Number of holes", [self.numHolesX, self.numHolesY]],
-            ["Holes", [self.holeShape, self.holeDiameter, self.holeDepth]],
-            ["Keepout", [self.keepoutShape, self.keepoutDiameter]],
+            ["Holes", [self.holeShape, self.holeDiameter, self.holeDepth, self.keepoutDiameter]],
             ["Other", [self.addStackingLip, self.exportFormat]],
             ["Magnets", [self.addMagnetHoles, self.addRemovalHoles, self.addScrewHoles, self.magnetHoleDiameter]],
         ]

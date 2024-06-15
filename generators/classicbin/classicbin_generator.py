@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from grid_constants import *
 import logging
 
+from generators.common.bin_base import bin_base
+
 logger = logging.getLogger('CBG')
 
 class Generator:
@@ -26,69 +28,6 @@ class Generator:
         self.compartmentSizeX = self.internalSizeX / self.settings.compartmentsX
         self.compartmentSizeY = self.internalSizeY / self.settings.compartmentsY
         self.compartmentSizeZ = (self.settings.sizeUnitsZ-1)*self.grid.HEIGHT_UNITSIZE_MM
-
-    def unit_base(self, basePlane):
-        """Construct a 1x1 GridFinity unit base on the provided workplane"""
-        
-        # The elements are constructed "centered" because that makes life easier. 
-        baseBottom = basePlane.box(self.grid.BASE_BOTTOM_SIZE_X, self.grid.BASE_BOTTOM_SIZE_Y, self.grid.BASE_BOTTOM_THICKNESS, combine=False)
-        baseBottom = baseBottom.edges("|Z").fillet(self.grid.BASE_BOTTOM_FILLET_RADIUS)
-        baseBottom = baseBottom.faces("<Z").chamfer(self.grid.BASE_BOTTOM_CHAMFER_SIZE)
-        
-        baseTop = baseBottom.faces(">Z").workplane()
-        baseTop = baseTop.box(self.grid.BRICK_UNIT_SIZE_X, self.grid.BRICK_UNIT_SIZE_Y, self.grid.BASE_TOP_THICKNESS, centered=(True, True, False), combine=False)
-        baseTop = baseTop.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS)
-        baseTop = baseTop.faces("<Z").chamfer(self.grid.BASE_TOP_CHAMFER_SIZE)
-        
-        result = baseTop | baseBottom
-        
-        if self.settings.addMagnetHoles:
-            result = result.faces("<Z").workplane()
-            result = result.pushPoints([(self.grid.HOLE_OFFSET_X, self.grid.HOLE_OFFSET_Y),
-                                                (-self.grid.HOLE_OFFSET_X, self.grid.HOLE_OFFSET_Y),
-                                                (self.grid.HOLE_OFFSET_X, -self.grid.HOLE_OFFSET_Y),
-                                                (-self.grid.HOLE_OFFSET_X, -self.grid.HOLE_OFFSET_Y)])
-            result = result.hole(self.settings.magnetHoleDiameter, self.grid.DEFAULT_MAGNET_HOLE_DEPTH)
-
-            if self.settings.addRemovalHoles:
-                result = result.pushPoints([(self.grid.HOLE_OFFSET_X-self.grid.REMOVABLE_MAGNET_HOLE_OFFSET, self.grid.HOLE_OFFSET_Y-self.grid.REMOVABLE_MAGNET_HOLE_OFFSET),
-                                                (-self.grid.HOLE_OFFSET_X+self.grid.REMOVABLE_MAGNET_HOLE_OFFSET, self.grid.HOLE_OFFSET_Y-self.grid.REMOVABLE_MAGNET_HOLE_OFFSET),
-                                                (self.grid.HOLE_OFFSET_X-self.grid.REMOVABLE_MAGNET_HOLE_OFFSET, -self.grid.HOLE_OFFSET_Y+self.grid.REMOVABLE_MAGNET_HOLE_OFFSET),
-                                                (-self.grid.HOLE_OFFSET_X+self.grid.REMOVABLE_MAGNET_HOLE_OFFSET, -self.grid.HOLE_OFFSET_Y+self.grid.REMOVABLE_MAGNET_HOLE_OFFSET)])
-                result = result.hole(self.grid.REMOVABLE_MAGNET_HOLE_DIAMETER, self.grid.DEFAULT_MAGNET_HOLE_DEPTH)
-
-        if self.settings.addScrewHoles:
-            result = result.faces("<Z").workplane()
-            result = result.pushPoints([(self.grid.HOLE_OFFSET_X, self.grid.HOLE_OFFSET_Y),
-                                        (-self.grid.HOLE_OFFSET_X, self.grid.HOLE_OFFSET_Y),
-                                        (self.grid.HOLE_OFFSET_X, -self.grid.HOLE_OFFSET_Y),
-                                        (-self.grid.HOLE_OFFSET_X, -self.grid.HOLE_OFFSET_Y)])
-            result = result.hole(self.grid.SCREW_HOLE_DIAMETER, self.grid.SCREW_HOLE_DEPTH)
-            
-        # Translate the result because it is now centered around the origin, which is inconvenient for subsequent steps
-        result = result.translate((self.grid.BRICK_UNIT_SIZE_X/2, self.grid.BRICK_UNIT_SIZE_Y/2, self.grid.BASE_BOTTOM_THICKNESS/2))
-                
-        return result
-
-    def grid_base(self, basePlane):
-        """Construct a base of WidthxLength grid units"""
-        
-        result = basePlane.workplane()
-        
-        for x in range(self.settings.sizeUnitsX):
-            for y in range(self.settings.sizeUnitsY):
-                result.add(self.unit_base(basePlane).translate((x*self.grid.GRID_UNIT_SIZE_X_MM, y*self.grid.GRID_UNIT_SIZE_Y_MM, 0)))
-        
-        return result
-
-    def brick_floor(self, basePlane):
-        """Create a floor covering all unit bases"""
-
-        floor = basePlane.box(self.brickSizeX, self.brickSizeY, self.grid.FLOOR_THICKNESS, centered = False, combine = False)
-        
-        floor = floor.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS)
-
-        return floor
 
     def outer_wall(self, basePlane):
         """Create the outer wall of the bin"""
@@ -209,18 +148,11 @@ class Generator:
 
     def generate_model(self):
         plane = cq.Workplane("XY")
-        result = plane.workplane()
 
-        # Add the base of Gridfinity profiles
-        result.add(self.grid_base(plane))
+        # First create the base
+        result = bin_base(plane, self.settings, self.grid)
 
-        # Continue from the top of the base
-        plane = result.faces(">Z").workplane()
-
-        # Add the floor of the bin
-        result.add(self.brick_floor(plane))
-
-        # Continue from the top of the floor
+        # Continue at the top of the base
         plane = result.faces(">Z").workplane()
 
         # Add the outer walls

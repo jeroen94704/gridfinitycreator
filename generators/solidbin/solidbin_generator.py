@@ -40,21 +40,21 @@ class Generator:
         result = wall.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS)
         
         if self.settings.addStackingLip:
-                cutout = (
-                    wall.faces(">Z").workplane().center(thickness, thickness)
-                    .box(self.internalSizeX, self.internalSizeY, self.grid.STACKING_LIP_HEIGHT, centered=False, combine = False)
-                    .translate((0,0,-self.grid.STACKING_LIP_HEIGHT))
-                        )
+            cutout = (
+                wall.faces(">Z").workplane().center(thickness, thickness)
+                .box(self.internalSizeX, self.internalSizeY, self.grid.STACKING_LIP_HEIGHT, centered=False, combine = False)
+                .translate((0,0,-self.grid.STACKING_LIP_HEIGHT))
+                    )
 
-                # If the walls are thicker than the outside radius of the corners, skip the fillet
-                if thickness < self.grid.CORNER_FILLET_RADIUS:
-                    cutout = cutout.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS-thickness)
+            # If the walls are thicker than the outside radius of the corners, skip the fillet
+            if thickness < self.grid.CORNER_FILLET_RADIUS:
+                cutout = cutout.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS-thickness)
 
-                result = result - cutout
+            result = result - cutout
 
-                result = result.edges(
-                            cq.selectors.NearestToPointSelector((self.brickSizeX/2, self.brickSizeY/2, sizeZ*2))
-                        ).chamfer(thickness - self.grid.CHAMFER_EPSILON)
+            result = result.edges(
+                        cq.selectors.NearestToPointSelector((self.brickSizeX/2, self.brickSizeY/2, sizeZ*2))
+                    ).chamfer(thickness - self.grid.CHAMFER_EPSILON)
             
         return result
 

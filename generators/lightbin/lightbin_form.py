@@ -26,7 +26,7 @@ class Form(FlaskForm):
     def get_rows(self):
         return [
             ["Size", [self.sizeUnitsX, self.sizeUnitsY, self.sizeUnitsZ]],
-            ["Options", [self.addStackingLip, self.exportFormat]],
+            ["Options", [self.addStackingLip, self.addLabelRidge, self.exportFormat]],
         ]
     
     def get_title(self):

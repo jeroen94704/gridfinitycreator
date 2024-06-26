@@ -11,6 +11,7 @@ class Form(FlaskForm):
     sizeUnitsY     = IntegerField("Length", widget=NumberInput(min = 1, max = Grid.MAX_GRID_UNITS), default=2)
     sizeUnitsZ     = IntegerField("Height", widget=NumberInput(min = 1, max = Grid.MAX_HEIGHT_UNITS), default=6)
     addStackingLip = BooleanField("Stacking lip", default="True")
+    addLabelRidge  = BooleanField("Add label tab", default="True", false_values=(False, "false", ""))
     exportFormat   = SelectField('Export format', choices=[('stl', 'STL'), ('step', 'STEP')])
 
     def __init__(self, *args, **kwargs):
@@ -20,11 +21,12 @@ class Form(FlaskForm):
         self.sizeUnitsZ.description = help.get_size_help()
         self.addStackingLip.description = help.get_stackinglip_help()
         self.exportFormat.description = help.get_exportformat_help()
+        self.addLabelRidge.description = help.get_labeltab_help()
 
     def get_rows(self):
         return [
             ["Size", [self.sizeUnitsX, self.sizeUnitsY, self.sizeUnitsZ]],
-            ["Options", [self.addStackingLip, self.exportFormat]],
+            ["Options", [self.addStackingLip, self.addLabelRidge, self.exportFormat]],
         ]
     
     def get_title(self):

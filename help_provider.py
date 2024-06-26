@@ -27,3 +27,19 @@ def get_scoopramp_help():
 def get_compartment_help():
     with open(os.path.dirname(__file__) + '/help_files/compartment_help.html', 'r') as reader:
         return reader.read()
+    
+def get_holey_shape_help():
+    with open(os.path.dirname(__file__) + '/help_files/holey_shape_help.html', 'r') as reader:
+        return reader.read()
+
+def get_holey_size_help():
+    with open(os.path.dirname(__file__) + '/help_files/holey_size_help.html', 'r') as reader:
+        return reader.read()
+    
+def get_holey_keepout_help():
+    with open(os.path.dirname(__file__) + '/help_files/holey_keepout_help.html', 'r') as reader:
+        return reader.read()
+    
+def get_holey_numholes_help():
+    with open(os.path.dirname(__file__) + '/help_files/holey_numholes_help.html', 'r') as reader:
+        return reader.read()

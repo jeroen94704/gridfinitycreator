@@ -21,6 +21,7 @@ def process(form, constants):
     s.sizeUnitsY = form.sizeUnitsY.data
     s.sizeUnitsZ = form.sizeUnitsZ.data
     s.addStackingLip = form.addStackingLip.data
+    s.addLabelRidge = form.addLabelRidge.data
 
     # Default grid (Gridfinity)
     if not constants:

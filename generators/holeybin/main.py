@@ -9,6 +9,8 @@ import uuid
 import os
 import logging
 
+from holeybin_settings import HoleShape
+
 logger = logging.getLogger('HBG')
 
 def get_generator(settings):
@@ -20,7 +22,7 @@ def process(form, constants):
     s.numHolesX = form.numHolesX.data
     s.numHolesY = form.numHolesY.data
     s.holeShape = form.holeShape.data
-    s.holeDiameter = float(form.holeDiameter.data)
+    s.holeSize = float(form.holeSize.data)
     s.holeDepth      = float(form.holeDepth.data)
     s.keepoutDiameter   = float(form.keepoutDiameter.data)
 

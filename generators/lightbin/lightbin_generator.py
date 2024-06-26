@@ -1,6 +1,10 @@
 import cadquery as cq
 from cadquery import exporters
 from grid_constants import *
+import time
+import logging
+
+logger = logging.getLogger('LBG')
 
 class Generator:
     def __init__(self, settings, grid) -> None:
@@ -26,100 +30,102 @@ class Generator:
     def unit_base(self, basePlane):
         """Construct a 1x1 GridFinity unit base on the provided workplane"""
 
-        plane = basePlane.workplane()
+        x_offs = self.grid.BRICK_UNIT_SIZE_X/2-3.5
+        frame_pts = [(0+x_offs,0),       (0+x_offs, 3.15), 
+                    (1.6+x_offs, 4.75), (3.5+x_offs, 4.75),
+                    (1.35+x_offs, 2.6), (1.35+x_offs, 0.8),
+                    (0.55+x_offs, 0) 
+                    ]
 
-        profile = (cq.Workplane("XZ").moveTo(self.grid.BRICK_UNIT_SIZE_X/2,0).sketch()
-                        .segment((0,0), (-2.15, -2.15))
-                        .segment((-2.15, -3.95))
-                        .segment((-2.95, -4.75))
-                        .segment((-3.5, -4.75))
-                        .segment((-3.5, -1.6))
-                        .segment((-1.9, 0))
-                        .close()
-                        .assemble()
-                        .finalize()
-                        .wire()
-                        )
-        
-        theBox = plane.box(self.grid.BRICK_UNIT_SIZE_X,self.grid.BRICK_UNIT_SIZE_Y,0.1).edges('|Z').fillet(self.grid.CORNER_FILLET_RADIUS).translate((0,0,-2))
-        path = theBox.edges('>Z')
-        path = path.wire(path.toPending())
-        result = profile.sweep(path)
-        
-        d = 34.6
-        s = cq.selectors.BoxSelector((-d/2,-d/2,-5.5), (d/2,d/2,-4.5))
-        bottomOutline = cq.Wire.assembleEdges(result.edges(s).objects)
-        bottom = basePlane.add(bottomOutline)
-        bottom = bottom.wires().toPending().extrude(self.settings.wallThickness)
-        
-        result = result.add(bottom).combine()
-        s = cq.selectors.BoxSelector((-d/2,-d/2,-3.2), (d/2,d/2,-3.3))
-        result = result.edges(s).chamfer(0.25)
-                
+        path = basePlane.rect(self.grid.BRICK_UNIT_SIZE_X, self.grid.BRICK_UNIT_SIZE_X).val()
+        path = path.fillet2D(self.grid.BASE_TOP_FILLET_RADIUS, path.Vertices())
+
+        baseUnit = (
+            cq.Workplane("XZ")
+            .polyline(frame_pts)
+            .close()
+            .sweep(path)
+            )
+
+        floor = basePlane.box(self.grid.BRICK_UNIT_SIZE_X-6.7,self.grid.BRICK_UNIT_SIZE_X-6.7,self.settings.wallThickness).translate((0,0,self.settings.wallThickness/2))
+        baseUnit = baseUnit.add(floor)
+        baseUnit = baseUnit.combine()
+
         # Translate the result because it is now centered around the origin, which is inconvenient for subsequent steps
-        result = result.translate((self.grid.BRICK_UNIT_SIZE_X/2, self.grid.BRICK_UNIT_SIZE_Y/2, self.grid.BASE_BOTTOM_THICKNESS/2))
-                
-        return result
+        baseUnit = baseUnit.translate((self.grid.BRICK_UNIT_SIZE_X/2, self.grid.BRICK_UNIT_SIZE_Y/2))
+
+        return baseUnit
 
     def grid_base(self, basePlane):
         """Construct a base of WidthxLength grid units"""
         
-        result = basePlane.workplane()
-        
+        result = basePlane
+
         baseUnit = self.unit_base(basePlane)
+
         for x in range(self.settings.sizeUnitsX):
             for y in range(self.settings.sizeUnitsY):
                 result.add(baseUnit.translate((x*self.grid.GRID_UNIT_SIZE_X_MM, y*self.grid.GRID_UNIT_SIZE_Y_MM, 0)))
-        
+
         return result
 
     def brick_floor(self, basePlane):
         """Create a floor covering all unit bases"""
 
-        plane=basePlane.workplane()
-
         # Create the solid floor
-        floor = basePlane.box(self.brickSizeX, self.brickSizeY, 0.9, centered = False, combine = False)
-        floor = floor.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS)
+        floor = basePlane.box(self.grid.GRID_UNIT_SIZE_X_MM, self.grid.GRID_UNIT_SIZE_X_MM, self.grid.LIGHT_FLOOR_THICKNESS, centered = True, combine = False)
 
         # Create the cutout and remove it for each base unit
         cutoutSizeX = self.grid.BRICK_UNIT_SIZE_X-2*self.grid.WALL_THICKNESS
         cutoutSizeY = self.grid.BRICK_UNIT_SIZE_Y-2*self.grid.WALL_THICKNESS
-        cutout = plane.box(cutoutSizeX, cutoutSizeY,3, combine=False)
+        cutout = basePlane.box(cutoutSizeX, cutoutSizeY,3, centered = True, combine=False)
         cutout = cutout.edges("|Z")
         cutout = cutout.fillet(self.grid.CORNER_FILLET_RADIUS-self.grid.WALL_THICKNESS)
-        cutout = cutout.translate((self.grid.BRICK_UNIT_SIZE_X/2, self.grid.BRICK_UNIT_SIZE_Y/2, 0))
-                                  
+        
+        floor = floor - cutout
+
+        # Chamfer the sharp edges 
+        dx = self.grid.BRICK_UNIT_SIZE_X/2
+        dy = self.grid.BRICK_UNIT_SIZE_Y/2
+        s = cq.selectors.BoxSelector((0,0,5), (dx,dy,6))
+        floor = floor.edges(s).chamfer(self.grid.LIGHT_FLOOR_THICKNESS-self.grid.CHAMFER_EPSILON)
+        floor = floor.translate((self.grid.BRICK_UNIT_SIZE_X/2, self.grid.BRICK_UNIT_SIZE_Y/2, self.grid.LIGHT_FLOOR_THICKNESS/2))
+
+        result = basePlane
         for x in range(self.settings.sizeUnitsX):
             for y in range(self.settings.sizeUnitsY):
-                floor = floor - cutout.translate((x*self.grid.GRID_UNIT_SIZE_X_MM, y*self.grid.GRID_UNIT_SIZE_Y_MM, 0))
-
-        # Chanfer the sharp edges 
-        dx = self.brickSizeX
-        dy = self.brickSizeY
-        s = cq.selectors.BoxSelector((0,0,2), (dx,dy,3))
-        floor = floor.edges(s).chamfer(0.9-self.grid.CHAMFER_EPSILON)
+                result.add(floor.translate((x*self.grid.GRID_UNIT_SIZE_X_MM, y*self.grid.GRID_UNIT_SIZE_Y_MM, 0)))
         
-        return floor
+        result = result.combine()
+        
+        # Create 
+        plane = cq.Workplane("XY")
+        cutout = plane.box(self.brickSizeX, self.brickSizeX, 1.9, centered=True, combine = False)
+        cutout = cutout.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS)
+        shrink_box = plane.box(self.brickSizeX+5, self.brickSizeY+5, 1.9, centered = True, combine = False)
+        shrink_box = shrink_box - cutout
+        shrink_box = shrink_box.translate((self.brickSizeX/2, self.brickSizeX/2, 5.25))
+
+        result = result - shrink_box
+    
+        return result
 
     def outer_wall(self, basePlane):
         """Create the outer wall of the bin"""
-
-        plane=basePlane.workplane()
         
+        plane = basePlane.workplane()
         sizeZ = self.compartmentSizeZ + self.grid.FLOOR_THICKNESS
 
         if self.settings.addStackingLip:
             sizeZ = sizeZ + self.grid.STACKING_LIP_HEIGHT
 
-        wall = plane.box(self.brickSizeX, self.brickSizeY, sizeZ, centered=False, combine = False)
+        wall = plane.box(self.brickSizeX, self.brickSizeY, sizeZ, combine = False)
         
         thickness = self.grid.WALL_THICKNESS
         wall = wall.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS)
 
         cutout = (
-                    plane.center(thickness, thickness)
-                    .box(self.internalSizeX, self.internalSizeY, sizeZ, centered=False, combine = False)
+                    plane.box(self.brickSizeX-2*thickness, self.brickSizeY-2*thickness, sizeZ, combine = False)
                 )
 
         # If the walls are thicker than the outside radius of the corners, skip the fillet
@@ -127,14 +133,38 @@ class Generator:
             cutout = cutout.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS-thickness)
         
         result = wall-cutout
-        
+
         if self.settings.addStackingLip:
             result = result.edges(
-                        cq.selectors.NearestToPointSelector((self.brickSizeX/2, self.brickSizeY/2, sizeZ*2))
+                        cq.selectors.NearestToPointSelector((0, 0, sizeZ*2))
                     ).chamfer(thickness-self.grid.CHAMFER_EPSILON)
+        
+        result = result.translate((self.brickSizeX/2,self.brickSizeY/2,sizeZ/2-self.grid.LIGHT_FLOOR_THICKNESS))
             
         return result
     
+    def label_tab(self, basePlane):
+        """Construct the pickip/label tab"""
+
+        result = basePlane
+
+        startX = self.grid.WALL_THICKNESS + self.compartmentSizeY
+    
+        result.add(
+            basePlane.sketch()
+            .segment((startX,self.brickSizeZ),(startX,self.brickSizeZ-self.settings.labelRidgeWidth))
+            .segment((startX-self.settings.labelRidgeWidth,self.brickSizeZ))
+            .close()
+            .reset()
+            .assemble()
+            .finalize()
+            .extrude(self.internalSizeX)
+            )
+
+        result = result.edges("<Y").fillet(0.5)
+
+        return result
+        
     def validate_settings(self):
         """Do some sanity checking on the settings to prevent impossible or unreasonable results"""
 
@@ -151,23 +181,33 @@ class Generator:
         self.settings.labelRidgeWidth = min(self.compartmentSizeY/2, self.settings.labelRidgeWidth)
 
     def generate_model(self):
-        plane = cq.Workplane("XY")
-        result = plane.workplane()
+        start_time = time.time()
 
         # Add the base of Gridfinity profiles
-        result.add(self.grid_base(plane))
+        result = self.grid_base(cq.Workplane("XY"))
 
-        # # Continue from the top of the base
+        logger.debug("--- %s seconds ---" % (time.time() - start_time))
+
+        # Continue from the top of the base
         plane = result.faces(">Z").workplane()
 
-        # Add the outer walls
-        result.add(self.outer_wall(plane))
-
         # Add the floor of the bin
-        result.add(self.brick_floor(plane)).combine()
+        result.add(self.brick_floor(plane))
+        logger.debug("--- %s seconds ---" % (time.time() - start_time))
+
+        # Add the outer walls
+        plane = result.faces(">Z").workplane()
+        result.add(self.outer_wall(plane))
+        logger.debug("--- %s seconds ---" % (time.time() - start_time))
+
+        # Add the grabbing/label tab
+        if self.settings.addLabelRidge:
+            plane = cq.Workplane("YZ").workplane(offset=self.grid.WALL_THICKNESS)
+            result.add(self.label_tab(plane))      
 
         # Combine everything together
         result = result.combine()
+        logger.debug("--- %s seconds ---" % (time.time() - start_time))
 
         return result
 

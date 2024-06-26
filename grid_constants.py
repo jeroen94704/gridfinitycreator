@@ -22,6 +22,7 @@ class Grid:
     BASE_TOP_THICKNESS: float = 2.15
     BASE_TOP_FILLET_RADIUS: float = 3.75
     FLOOR_THICKNESS: float = 2.25 # This thickness makes the base exactly 1 height unit high
+    LIGHT_FLOOR_THICKNESS: float = 0.9
     DEFAULT_MAGNET_HOLE_DIAMETER: float = 6.5
     DEFAULT_MAGNET_HOLE_DEPTH: float = 2
     SCREW_HOLE_DIAMETER: float = 3
@@ -44,7 +45,7 @@ class Grid:
 
     # Some limits for sanity checking the inputs
     MAX_COMPARTMENTS_PER_GRID_UNIT: float = 3
-    MAX_GRID_UNITS: float = 8
+    MAX_GRID_UNITS: float = 6
     MAX_HEIGHT_UNITS: float = 12
     MIN_HEIGHT_UNITS: float = 2 # A height of 1 unit would be just the base without anything on top
 

@@ -40,7 +40,7 @@ class Generator:
         result = cq.Workplane("XY")
 
         for x in range(self.settings.sizeUnitsX):
-            for y in range(self.settings.sizeUnitsX):
+            for y in range(self.settings.sizeUnitsY):
                 result.add(unit.translate((x*self.grid.GRID_UNIT_SIZE_X_MM, y*self.grid.GRID_UNIT_SIZE_Y_MM, 0)))
 
         result = result.combine(clean=True)

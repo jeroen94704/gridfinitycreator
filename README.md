@@ -1,6 +1,8 @@
 # Gridfinity Creator
 
-This application generates STL or STEP files of configurable Gridfinity compatible components. For example, for the standard divider bin you can specify width, length, height, number of compartments (in both directions) and whether or not you want a stacking lip, magnet holes, screw holes, curved scoop surface and/or one or more label tabs. The total number of possible combinations with those options is beyond one million, which is why the 3D models are dynamically created and not pre-calculated.
+This application generates STL or STEP files of configurable Gridfinity compatible components. For example, for the standard divider bin you can specify width, length, height, number of compartments (in both directions) and whether or not you want a stacking lip, magnet holes, screw holes, curved scoop surface and/or one or more label tabs. Here are some of the possible bins you can create in this way:
+![gridfinity-options](https://github.com/jeroen94704/gridfinitycreator/assets/548463/1577deb0-edc6-48d9-9a54-75fe3ecd335c)
+The total number of possible combinations with those options is beyond one million, which is why the 3D models are dynamically created and not pre-calculated.
 
 ## Available components
 

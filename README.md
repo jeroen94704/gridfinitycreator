@@ -10,6 +10,7 @@ There are currently a few components available, listed below. Other components a
 - Divider bin: Standard divider bin very similar to Zack's original design. 
 - Light bin: A light version of the normal Gridfinity bin that saves plastic and offers more room. This means there is no room for magnets and/or screws
 - Solid bin: A completely filled solid Gridfinity bin which can be used as a starting point for custom bins
+- Holey bin: A solid bin with a grid of holes of user-defined shape, size and depth. Includes option for a keepout-area around each hole
 
 ## Online generator
 

@@ -14,19 +14,19 @@ services:
     restart: unless-stopped
     networks:
       - proxy
-#    ports:
-#      - 5000:5000
+    ports:
+      - 5000:5000
     env_file:
       - .env.container
     volumes:
       - ${DATA_ROOT:?error}/gridfinitycreator/logs:/logs
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.gridfinity.rule=Host(`${GFG_DOMAIN:?error}`)"
-      - "traefik.http.routers.gridfinity.entrypoints=websecure"
-      - "traefik.http.routers.gridfinity.service=gridfinity_service"
-      - "traefik.http.routers.gridfinity.tls.certResolver=leresolver"
-      - "traefik.http.services.gridfinity_service.loadbalancer.server.port=5000"
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.gridfinity.rule=Host(`${GFG_DOMAIN:?error}`)"
+    #   - "traefik.http.routers.gridfinity.entrypoints=websecure"
+    #   - "traefik.http.routers.gridfinity.service=gridfinity_service"
+    #   - "traefik.http.routers.gridfinity.tls.certResolver=leresolver"
+    #   - "traefik.http.services.gridfinity_service.loadbalancer.server.port=5000"
 
 networks:
   proxy:

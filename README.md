@@ -24,10 +24,12 @@ The generator runs as a web-application in a docker container. To run your own i
 
 - [Download and unzip the code](https://github.com/jeroen94704/gridfinitycreator/releases/latest) or clone the repository: `git clone https://github.com/jeroen94704/gridfinitycreator`
 - cd into the source directory
-- Build the Docker Image: `./build.sh`
-- Start the server: `./deploy.sh`
+- Build the Docker Image: `./build.sh` (may need to prefix this with 'sudo')
+- Start the server: `./deploy.sh` (may need to prefix this with 'sudo')
 
-You may have to run the above commands as root (e.g. using "sudo")
+Now you can access the application by opening a browser and navigating to <ip-address-of-server>:5000, e.g.
+
+`http://192.168.1.100:5000/`
 
 ## Debug mode
 

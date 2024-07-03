@@ -1,0 +1,50 @@
+<div class="row">
+    {% for row in form.get_rows() if row[0] %}
+    <div class="col-6">
+        <div class="card mb-3">
+            <div class="card-header">{{ row[0] }}</div>
+            <div class="card-body">
+                {% for field in row[1] %}
+                <div class="row m-1">
+                    <div class="col-5 text-end">
+                        {{ field.label }}
+                        <span class="help-button badge rounded-pill bg-primary" style="cursor: pointer;">?<div
+                                id="content" class="d-none">{{field.description | safe}}</div></span> :
+                    </div>
+                    <div class="col-7">
+                        {% if field.widget.input_type == 'checkbox' %}
+                        <div class="form-check form-switch">
+                            {% if field.object_data %}
+                            {{ field(role_="switch", class_="form-check-input", checked_=field.object_data) }}
+                            {% else %}
+                            {{ field(role_="switch", class_="form-check-input") }}
+                            {% endif %}
+                        </div>
+                        {% elif field.type == 'SelectField' %}
+                        {{ field(class_="form-select") }}
+                        {% else %}
+                        {{ field() }}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {{ loop.cycle('', '<div class="w-100"></div>')|safe }}
+    {% endfor %}
+</div>
+<div class="row justify-content-center">
+    <div class="col text-center">
+        <button type="submit" id="{{form.id}}_button" name="{{form.id}}" class="btn btn-primary"> <!-- onclick="onClick{{form.id}}()"> -->
+            <span>Generate</span>
+        </button>
+        <!-- <input class="btn btn-primary"  type="submit" value="Generate"> -->
+    </div>
+</div>
+
+<!-- <script type="text/javascript">
+function onClick{{form.id}}() {
+    document.getElementById("{{form.id}}_button").innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span role="status"> Generating...</span>'
+}
+</script> -->

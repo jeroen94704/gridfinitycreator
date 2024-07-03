@@ -4,6 +4,7 @@ from wtforms.widgets import NumberInput
 from grid_constants import *
 import os
 import help_provider as help
+from generators.common.settings_form import get_standard_settings_form
 
 class Form(FlaskForm):
     id = "baseplate"
@@ -23,6 +24,9 @@ class Form(FlaskForm):
             ["Options", [self.exportFormat]],
         ]
     
+    def get_settings_html(self):
+        return get_standard_settings_form()
+
     def get_title(self):
         return "Baseplate"
     

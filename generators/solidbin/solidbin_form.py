@@ -3,6 +3,7 @@ from wtforms import IntegerField, DecimalField, SelectField, BooleanField
 from wtforms.widgets import NumberInput
 from grid_constants import *
 import os
+from generators.common.settings_form import get_standard_settings_form
 
 class Form(FlaskForm):
     id = "solidbin"
@@ -29,6 +30,9 @@ class Form(FlaskForm):
     def get_title(self):
         return "Solid bin"
     
+    def get_settings_html(self):
+        return get_standard_settings_form()
+
     def get_description(self):
         with open(os.path.dirname(__file__) + '/solidbin_description.html', 'r') as reader:
             return reader.read()    

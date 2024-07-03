@@ -1,0 +1,60 @@
+<div class="offcanvas offcanvas-start" tabindex="-1" id="settings" aria-labelledby="settingsLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="settingsLabel">Advanced settings</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div>
+            <p>Below is the specification of the grid used by the generator to create components. You can select one of
+                the presets or adjust the settings individually.</p>
+            <div class="alert alert-info">
+                <h5 class="alert-heading">Note</h5>
+                <p class="mb-0">All measurements are in millimeters</p>
+            </div>
+            <div class="alert alert-danger">
+                <h5 class="alert-heading">Beware</h5>
+                <p class="mb-0">The defaults comply with the Gridfinity specification and have been tested to work well.
+                    Don't make any changes unless you have a good reason to do so and you know what you're doing.</p>
+            </div>
+        </div>
+        <hr />
+        <h5>Presets</h5>
+        <select class="form-select" id="grid-presets" onchange="presetChanged()">
+            <option value="Gridfinity" selected>Gridfinity</option>
+            <option value="Raaco">Raaco</option>
+        </select>
+        <p id="demo"></p>
+        <hr />
+        <h5>Constants</h5>
+        <form method="post">
+            <div class="row justify-content-center">
+                <div class="col text-center">
+                    <div class="row m-1">
+                        <div class="col-4 text-end"><label for="gridSizeX">Grid size X</label>:</div>
+                        <div class="col-8">
+                            <input id="gridSizeX" name="gridSizeX" type="number" step="any" value="{{gridsize_x}}">
+                        </div>
+                    </div>
+                    <div class="row m-1">
+                        <div class="col-4 text-end"><label for="gridSizeZ">Grid size Y</label>:</div>
+                        <div class="col-8">
+                            <input id="gridSizeY" name="gridSizeY" type="number" step="any" value="{{gridsize_y}}">
+                        </div>
+                    </div>
+                    <div class="row m-1">
+                        <div class="col-4 text-end"><label for="gridSizeZ">Height unit</label>:</div>
+                        <div class="col-8">
+                            <input id="gridSizeZ" name="gridSizeZ" type="number" step="any" value="{{gridsize_z}}">
+                        </div>
+                    </div>
+                    <div class="row m-1">
+                        <div class="col">
+                            <input class="btn btn-primary" id="advanced_settings" name="advanced_settings" type="submit"
+                                value="Save">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

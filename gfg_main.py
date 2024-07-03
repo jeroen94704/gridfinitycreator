@@ -1,22 +1,19 @@
-from flask import Flask, render_template, session, make_response, request
-from flask_bootstrap import Bootstrap4
-from flask_wtf import FlaskForm
-from wtforms import IntegerField, SubmitField, BooleanField
-from wtforms.widgets import NumberInput
-import waitress
-from grid_constants import *
-from werkzeug.middleware.proxy_fix import ProxyFix
-from contextlib import contextmanager
-from dataclasses import dataclass
-
-import grid_constants
-from version import __version__
-
+import importlib
 import logging
 import logging.handlers
 import os
-import importlib
 import sys
+import waitress
+
+from contextlib import contextmanager
+
+from flask import Flask, make_response, request
+from jinja2 import Environment, FileSystemLoader, StrictUndefined, Template
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+import grid_constants
+from grid_constants import *
+from version import __version__
 
 app = Flask(__name__)
 
@@ -28,15 +25,24 @@ app.wsgi_app = ProxyFix(
     app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
 )
 
-# Flask-Bootstrap requires this line
-Bootstrap4(app)
-
+# Globals
 generators = []
 logger = None
 
 # Constants
 GEN_FOLDER = "./generators"
 MAIN_MODULE = "main.py"
+
+def inner_render(value, context):
+    return Template(value).render(context)
+
+def render_index(form_list, constants, message):
+    jinja_env = Environment(loader=FileSystemLoader(["./", os.path.realpath(__file__)]), undefined=StrictUndefined)
+    jinja_env.filters["inner_render"] = inner_render
+
+    index_template = jinja_env.get_template("templates/index.html")
+    return index_template.render(version=__version__, forms=form_list, message=message, gridsize_x=constants.GRID_UNIT_SIZE_X_MM,
+                            gridsize_y=constants.GRID_UNIT_SIZE_Y_MM, gridsize_z=constants.HEIGHT_UNITSIZE_MM)
 
 # Handle GET requests for "/"
 @app.route('/', methods=['GET'])
@@ -59,8 +65,7 @@ def index_get():
     for gen in generators:
         form_list.append(gen.get_form())
 
-    response = make_response(render_template('index.html', version=__version__, forms=form_list, message='', gridsize_x=constants.GRID_UNIT_SIZE_X_MM,
-                                             gridsize_y=constants.GRID_UNIT_SIZE_Y_MM, gridsize_z=constants.HEIGHT_UNITSIZE_MM))
+    response = make_response(render_index(form_list, constants, ''))
 
     if not request.cookies.get('gridspec'):
         response.set_cookie('gridspec', str('{0},{1},{2}').format(constants.GRID_UNIT_SIZE_X_MM, constants.GRID_UNIT_SIZE_Y_MM, constants.HEIGHT_UNITSIZE_MM))
@@ -103,9 +108,8 @@ def index_post():
             # Generate an STL with the provided settings
             logger.info("Generating {0} for: {1}".format(f.get_title(), request.remote_addr))
             return gen.process(f, constants)
-
-    response = make_response(render_template('index.html', version=__version__, forms=form_list, message=message, gridsize_x=constants.GRID_UNIT_SIZE_X_MM,
-                                             gridsize_y=constants.GRID_UNIT_SIZE_Y_MM, gridsize_z=constants.HEIGHT_UNITSIZE_MM))
+    
+    response = make_response(render_index(form_list, constants, message))
     response.set_cookie('gridspec', str('{0},{1},{2}').format(constants.GRID_UNIT_SIZE_X_MM, constants.GRID_UNIT_SIZE_Y_MM, constants.HEIGHT_UNITSIZE_MM))
     return response
 
@@ -154,6 +158,7 @@ def load_generators():
     return generators
 
 class serverFilter():
+    """Filter records coming from the server out of the access log"""
     def filter(self, record):
         return (record.name != 'werkzeug') and (record.name != 'waitress')
 

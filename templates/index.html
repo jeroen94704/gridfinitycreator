@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'templates/base.html' %}
 
 {% block content %}
 
@@ -33,34 +33,7 @@
     <div id="home" class="tab-pane active">
       <div class="row p-3">
         <div class="col">
-          <h5>Welcome!</h5>
-
-          <p>
-            This site generates STL files for several types of customizable Gridfinity components. For each type you can
-            specify size (length, width and height), but also parameters such as the number of compartments and options
-            like whether or not to include magnet- and/or screw-holes, a stacking lip and more. Just fill in the
-            parameters and click the "Generate STL" button.
-          </p>
-
-          <div class="alert alert-warning">
-            <h5 class="alert-heading">Warning</h5>
-            <p class="mb-0">
-              This is alpha software. It may produce incorrect output, fail inexplicably or cease to exist at any
-              moment.
-            </p>
-          </div>
-
-          <h5>Alternatives</h5>
-
-          <p>There are quite a few other Gridfinity generators available, both online and offline, each with their own advantages and use-cases. The ones I know about are:</p>
-
-          <ul>
-            <li><a href="https://gridfinity.perplexinglabs.com/">Online generator with a nice preview, by perplexinglabs</a></li>
-            <li><a href="https://vector76.github.io/Web_OpenSCAD_Customizer/gridfinity_bins.html">Onlnie generator, based on an OpenSCAD implementation</a></li>
-            <li><a href="https://apps.autodesk.com/FUSION/en/Detail/Index?id=7197558650811789">A Fusion360 Gridfinity App</a></li>
-            <li><a href="https://github.com/michaelgale/cq-gridfinity">A python library to build Gridfinity objects</a></li>
-            <li><a href="https://www.printables.com/@jdegs/collections/154274">Several Gridfinity generators by Printables user @jdegs</a></li>
-          </ul>
+          {% include 'templates/front_page.html' %}
         </div>
       </div>
     </div>
@@ -81,47 +54,8 @@
             <div class="card-header text-white bg-primary">Settings</div>
             <div class="card-body">
               <form method="post">
-                <div class="row">
-                  {{ form.csrf_token() }}
-                  {% for row in form.get_rows() if row[0] %}
-                  <div class="col-6">
-                    <div class="card mb-3">
-                      <div class="card-header">{{ row[0] }}</div>
-                      <div class="card-body">
-                        {% for field in row[1] %}
-                        <div class="row m-1">
-                          <div class="col-5 text-end">
-                            {{ field.label }} 
-                            <span class="help-button badge rounded-pill bg-primary" style="cursor: pointer;">?<div id="content" class="d-none">{{field.description | safe}}</div></span> :
-                          </div>
-                          <div class="col-7">
-                            {% if field.widget.input_type == 'checkbox' %}
-                            <div class="form-check form-switch">
-                              {% if field.object_data %}
-                                {{ field(role_="switch", class_="form-check-input", checked_=field.object_data) }}
-                              {% else %}
-                                {{ field(role_="switch", class_="form-check-input") }}
-                              {% endif %}
-                            </div>
-                            {% elif field.type == 'SelectField' %}
-                              {{ field(class_="form-select") }}
-                            {% else %}
-                              {{ field() }}
-                            {% endif %}
-                          </div>
-                        </div>
-                        {% endfor %}
-                      </div>
-                    </div>
-                  </div>
-                  {{ loop.cycle('', '<div class="w-100"></div>')|safe }}
-                  {% endfor %}
-                </div>
-                <div class="row justify-content-center">
-                  <div class="col text-center">
-                    <input class="btn btn-primary" id="{{form.id}}" name="{{form.id}}" type="submit" value="Generate">
-                  </div>
-                </div>
+                {{ form.csrf_token() }}
+                {{ form.get_settings_html() | inner_render({"form":form}) }}
               </form>
             </div>
           </div>
@@ -130,68 +64,10 @@
     </div>
     {% endfor %}
   </div>
-
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="settings" aria-labelledby="settingsLabel">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="settingsLabel">Advanced settings</h5>
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-      <div>
-        <p>Below is the specification of the grid used by the generator to create components. You can select one of
-          the presets or adjust the settings individually.</p>
-        <div class="alert alert-info">
-          <h5 class="alert-heading">Note</h5>
-          <p class="mb-0">All measurements are in millimeters</p>
-        </div>
-        <div class="alert alert-danger">
-          <h5 class="alert-heading">Beware</h5>
-          <p class="mb-0">The defaults comply with the Gridfinity specification and have been tested to work well.
-            Don't make any changes unless you have a good reason to do so and you know what you're doing.</p>
-        </div>
-      </div>
-      <hr />
-      <h5>Presets</h5>
-      <select class="form-select" id="grid-presets" onchange="presetChanged()">
-        <option value="Gridfinity" selected>Gridfinity</option>
-        <option value="Raaco">Raaco</option>
-      </select>
-      <p id="demo"></p>
-      <hr />
-      <h5>Constants</h5>
-      <form method="post">
-        <div class="row justify-content-center">
-          <div class="col text-center">
-            <div class="row m-1">
-              <div class="col-4 text-end"><label for="gridSizeX">Grid size X</label>:</div>
-              <div class="col-8">
-                <input id="gridSizeX" name="gridSizeX" type="number" step="any" value="{{gridsize_x}}">
-              </div>
-            </div>
-            <div class="row m-1">
-              <div class="col-4 text-end"><label for="gridSizeZ">Grid size Y</label>:</div>
-              <div class="col-8">
-                <input id="gridSizeY" name="gridSizeY" type="number" step="any" value="{{gridsize_y}}">
-              </div>
-            </div>
-            <div class="row m-1">
-              <div class="col-4 text-end"><label for="gridSizeZ">Height unit</label>:</div>
-              <div class="col-8">
-                <input id="gridSizeZ" name="gridSizeZ" type="number" step="any" value="{{gridsize_z}}">
-              </div>
-            </div>
-            <div class="row m-1">
-              <div class="col">
-                <input class="btn btn-primary" id="advanced_settings" name="advanced_settings" type="submit"
-                  value="Save">
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
+  
+  {% include 'templates/settings_offcanvas.html' %}
 </div>
+
 <div class="row text-center pb-4">
   <div class="col fw-lighter fs-6 text-secondary">
     <p>Gridfinity Creator v{{version}}. &copy;2024 Jeroen Bouwens.</p>

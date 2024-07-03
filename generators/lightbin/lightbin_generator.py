@@ -25,7 +25,7 @@ class Generator:
         self.internalSizeY = self.brickSizeY-2*self.grid.WALL_THICKNESS
         self.compartmentSizeX = self.internalSizeX / self.settings.compartmentsX
         self.compartmentSizeY = self.internalSizeY / self.settings.compartmentsY
-        self.compartmentSizeZ = (self.settings.sizeUnitsZ-1)*self.grid.HEIGHT_UNITSIZE_MM
+        self.compartmentSizeZ = (self.settings.sizeUnitsZ-1)*self.grid.HEIGHT_UNITSIZE_MM # This is the height in units minus the thickness of the base
 
     def unit_base(self, basePlane):
         """Construct a 1x1 GridFinity unit base on the provided workplane"""
@@ -148,20 +148,21 @@ class Generator:
 
         result = basePlane
 
-        startX = self.grid.WALL_THICKNESS + self.compartmentSizeY
-    
+        startX = self.grid.WALL_THICKNESS
+        labelRidgeHeight = min(self.compartmentSizeZ+2.25, self.settings.labelRidgeWidth-self.grid.CHAMFER_EPSILON)
+
         result.add(
             basePlane.sketch()
-            .segment((startX,self.brickSizeZ),(startX,self.brickSizeZ-self.settings.labelRidgeWidth))
-            .segment((startX-self.settings.labelRidgeWidth,self.brickSizeZ))
+            .segment((startX,self.brickSizeZ-labelRidgeHeight),(startX,self.brickSizeZ))
+            .segment((startX+self.settings.labelRidgeWidth,self.brickSizeZ))
+            .segment((startX,self.brickSizeZ-self.settings.labelRidgeWidth))
             .close()
             .reset()
             .assemble()
             .finalize()
             .extrude(self.internalSizeX)
+            .edges(">Y").fillet(0.5)
             )
-
-        result = result.edges("<Y").fillet(0.5)
 
         return result
         
@@ -181,24 +182,18 @@ class Generator:
         self.settings.labelRidgeWidth = min(self.compartmentSizeY/2, self.settings.labelRidgeWidth)
 
     def generate_model(self):
-        start_time = time.time()
-
         # Add the base of Gridfinity profiles
         result = self.grid_base(cq.Workplane("XY"))
-
-        logger.debug("--- %s seconds ---" % (time.time() - start_time))
 
         # Continue from the top of the base
         plane = result.faces(">Z").workplane()
 
         # Add the floor of the bin
         result.add(self.brick_floor(plane))
-        logger.debug("--- %s seconds ---" % (time.time() - start_time))
 
         # Add the outer walls
         plane = result.faces(">Z").workplane()
         result.add(self.outer_wall(plane))
-        logger.debug("--- %s seconds ---" % (time.time() - start_time))
 
         # Add the grabbing/label tab
         if self.settings.addLabelRidge:
@@ -207,7 +202,6 @@ class Generator:
 
         # Combine everything together
         result = result.combine()
-        logger.debug("--- %s seconds ---" % (time.time() - start_time))
 
         return result
 

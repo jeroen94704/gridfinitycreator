@@ -83,27 +83,28 @@ class Generator:
         return result
 
     def label_tab(self, basePlane):
-        """Construct the pickip/label tab"""
+        """Construct the pickup/label tab"""
 
         result = basePlane.workplane()
 
         numRidges = self.settings.compartmentsY if self.settings.multiLabel else 1
+        labelRidgeHeight = min(self.compartmentSizeZ, self.settings.labelRidgeWidth-self.grid.CHAMFER_EPSILON)
 
         for x in range(numRidges):
             startX = self.grid.WALL_THICKNESS + x*self.compartmentSizeY
             result.add(
                 basePlane.sketch()
-                .segment((startX,self.brickSizeZ-self.settings.labelRidgeWidth),(startX,self.brickSizeZ))
+                .segment((startX,self.brickSizeZ-labelRidgeHeight),(startX,self.brickSizeZ))
                 .segment((startX+self.settings.labelRidgeWidth,self.brickSizeZ))
+                .segment((startX+self.settings.labelRidgeWidth-labelRidgeHeight,self.brickSizeZ-labelRidgeHeight))
                 .close()
                 .reset()
                 .assemble()
                 .finalize()
                 .extrude(self.internalSizeX)
+                .edges(">Y").fillet(0.5)
                 )
-
-        result = result.edges(">Y").fillet(0.5)
-
+            
         return result
 
     def grab_curve(self, basePlane):
@@ -144,7 +145,7 @@ class Generator:
         self.settings.labelRidgeWidth = min(self.compartmentSizeY/2, self.settings.labelRidgeWidth)
 
         # Ensure the label tab is not deeper than the interior height of the bin or it will stick out 
-        self.settings.labelRidgeWidth = min(self.compartmentSizeZ, self.settings.labelRidgeWidth)
+        # self.settings.labelRidgeWidth = min(self.compartmentSizeZ, self.settings.labelRidgeWidth)
 
     def generate_model(self):
         plane = cq.Workplane("XY")

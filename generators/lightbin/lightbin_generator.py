@@ -100,11 +100,11 @@ class Generator:
         
         # Create 
         plane = cq.Workplane("XY")
-        cutout = plane.box(self.brickSizeX, self.brickSizeX, 1.9, centered=True, combine = False)
+        cutout = plane.box(self.brickSizeX, self.brickSizeY, 1.9, centered=True, combine = False)
         cutout = cutout.edges("|Z").fillet(self.grid.CORNER_FILLET_RADIUS)
         shrink_box = plane.box(self.brickSizeX+5, self.brickSizeY+5, 1.9, centered = True, combine = False)
         shrink_box = shrink_box - cutout
-        shrink_box = shrink_box.translate((self.brickSizeX/2, self.brickSizeX/2, 5.25))
+        shrink_box = shrink_box.translate((self.brickSizeX/2, self.brickSizeY/2, 5.25))
 
         result = result - shrink_box
     

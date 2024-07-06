@@ -17,8 +17,8 @@ class Generator:
 
     def precalculate(self):
         """Precalculate a number of useful derived values used in construction"""
-        self.settings.sizeUnitsX = math.ceil((self.settings.numHolesX * self.settings.keepoutDiameter + 2*self.grid.WALL_THICKNESS) / (self.grid.GRID_UNIT_SIZE_X_MM - self.grid.BRICK_SIZE_TOLERANCE_MM))
-        self.settings.sizeUnitsY = math.ceil((self.settings.numHolesY * self.settings.keepoutDiameter + 2*self.grid.WALL_THICKNESS) / (self.grid.GRID_UNIT_SIZE_Y_MM - self.grid.BRICK_SIZE_TOLERANCE_MM))
+        self.settings.sizeUnitsX = math.ceil((self.settings.numHolesX * self.settings.keepoutDiameter + 2*self.grid.WALL_THICKNESS + self.grid.BRICK_SIZE_TOLERANCE_MM) / self.grid.GRID_UNIT_SIZE_X_MM)
+        self.settings.sizeUnitsY = math.ceil((self.settings.numHolesY * self.settings.keepoutDiameter + 2*self.grid.WALL_THICKNESS + self.grid.BRICK_SIZE_TOLERANCE_MM) / self.grid.GRID_UNIT_SIZE_Y_MM)
         self.settings.sizeUnitsZ = 1 + math.ceil(self.settings.holeDepth / self.grid.HEIGHT_UNITSIZE_MM)
 
         self.brickSizeX = self.settings.sizeUnitsX * self.grid.GRID_UNIT_SIZE_X_MM - self.grid.BRICK_SIZE_TOLERANCE_MM 

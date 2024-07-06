@@ -53,7 +53,7 @@
           <div class="card p-0">
             <div class="card-header text-white bg-primary">Settings</div>
             <div class="card-body">
-              <form method="post">
+              <form method="post" id="{{form.id}}_form">
                 {{ form.csrf_token() }}
                 {{ form.get_settings_html() | inner_render({"form":form}) }}
               </form>

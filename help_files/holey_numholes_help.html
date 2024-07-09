@@ -1,11 +1,15 @@
-<p>The number of holes in Width and Length directions specify how many holes the grid consists of. Combined with the keepout diameter this determines how big the bin will be. The generator will create a bin of the minimum size required to fit the hole-grid</p>
+<p>The number of holes in the grid can be specified in one of two ways:</p>
 
-<p>Here you can see the result of increasing the number of holes in one direction by 1, while keeping all other parameters unchanged:</p>
+<ol>
+  <li>By setting the number of holes in the Width and Length directions</li>
+  <li>By setting the bin-size in gridfinity units.</li>
+</ol>
+
+<p>In both cases the other quantity will be recalculated automatically. So as soon as you set a number of holes (either in Width or Length), the bin-size will be set to
+the minimum size required to fit that number. As soon as you set a bin-size (either in Width or Length), the number of holes will be set to the maximum that fit in that
+size bin. Combined with the keepout diameter this determines how big the bin will be.</p>
+
+<p>Below you can see the result of increasing either the number of holes by 1 (bottom right), or setting the bin-Width to 2 (top right), while keeping all other
+parameters unchanged from the original 4x4-hole bin (left):</p>
 
 <p><img src="/static/holeybin_numholes.jpg" class="img-fluid rounded mx-auto d-block" /></p>
-
-<div class="alert alert-info">
-    <p class="mb-0">
-      In a future version you will optionally be able to specify the desired size of the bin and have the generator figure out how many holes fit in that size instead of the other way around.
-    </p>
-</div>

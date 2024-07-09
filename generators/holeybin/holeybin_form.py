@@ -28,12 +28,12 @@ class Form(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.numHolesX.description = help.get_holey_numholes_help()
-        self.numHolesY.description = help.get_holey_numholes_help()
-        self.holeDepth.description = help.get_holey_numholes_help()
+        self.numHolesX.description = help.get_holey_gridspec_help()
+        self.numHolesY.description = help.get_holey_gridspec_help()
+        self.holeDepth.description = help.get_holey_gridspec_help()
         self.holeShape.description = help.get_holey_shape_help()
-        self.sizeUnitsX.description = help.get_size_help()
-        self.sizeUnitsY.description = help.get_size_help()
+        self.sizeUnitsX.description = help.get_holey_gridspec_help()
+        self.sizeUnitsY.description = help.get_holey_gridspec_help()
         self.holeSize.description = help.get_holey_size_help()
         self.keepoutDiameter.description = help.get_holey_keepout_help()
         self.addStackingLip.description = help.get_stackinglip_help()

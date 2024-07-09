@@ -40,6 +40,6 @@ def get_holey_keepout_help():
     with open(os.path.dirname(__file__) + '/help_files/holey_keepout_help.html', 'r') as reader:
         return reader.read()
     
-def get_holey_numholes_help():
+def get_holey_gridspec_help():
     with open(os.path.dirname(__file__) + '/help_files/holey_numholes_help.html', 'r') as reader:
         return reader.read()

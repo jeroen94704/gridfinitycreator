@@ -52,6 +52,7 @@ I have no experience with other reverse proxy methods (Apache, nginx, Helm, etc)
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/NoSQLKnowHow"><img src="https://avatars.githubusercontent.com/u/2966377?v=4?s=100" width="100px;" alt="Kirk Kirkconnell"/><br /><sub><b>Kirk Kirkconnell</b></sub></a><br /><a href="#ideas-NoSQLKnowHow" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/wug-ge"><img src="https://avatars.githubusercontent.com/u/75441883?v=4?s=100" width="100px;" alt="wug-ge"/><br /><sub><b>wug-ge</b></sub></a><br /><a href="#bug-wug-ge" title="Bug reports">🐛</a></td>
     </tr>
   </tbody>
 </table>

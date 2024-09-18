@@ -48,6 +48,13 @@ I have no experience with other reverse proxy methods (Apache, nginx, Helm, etc)
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/NoSQLKnowHow"><img src="https://avatars.githubusercontent.com/u/2966377?v=4?s=100" width="100px;" alt="Kirk Kirkconnell"/><br /><sub><b>Kirk Kirkconnell</b></sub></a><br /><a href="#ideas-NoSQLKnowHow" title="Ideas, Planning, & Feedback">🤔</a></td>
+    </tr>
+  </tbody>
+</table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->

@@ -1,3 +1,5 @@
+[![All Contributors](https://img.shields.io/github/all-contributors/jeroen94704/gridfinitycreator?color=ee8449&style=flat-square)](#contributors)
+
 # Gridfinity Creator
 
 This application generates STL or STEP files of configurable Gridfinity compatible components. For example, for the standard divider bin you can specify width, length, height, number of compartments (in both directions) and whether or not you want a stacking lip, magnet holes, screw holes, curved scoop surface and/or one or more label tabs. Here are some of the possible bins you can create in this way:

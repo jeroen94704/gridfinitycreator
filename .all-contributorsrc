@@ -1,4 +1,21 @@
 {
   "projectName": "gridfinitycreator",
-  "projectOwner": "jeroen94704"
+  "projectOwner": "jeroen94704",
+  "files": [
+    "README.md"
+  ],
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributorsPerLine": 7,
+  "contributors": [
+    {
+      "login": "NoSQLKnowHow",
+      "name": "Kirk Kirkconnell",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2966377?v=4",
+      "profile": "https://github.com/NoSQLKnowHow",
+      "contributions": [
+        "ideas"
+      ]
+    }
+  ]
 }

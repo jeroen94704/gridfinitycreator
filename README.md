@@ -41,6 +41,17 @@ Because I use Traefik myself I included the Traefik labels I use in the docker-c
 
 I have no experience with other reverse proxy methods (Apache, nginx, Helm, etc), so if anyone creates instructions for setting up GridfinityCreator with any of those I'd happily accept the pull-request.
 
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
 ## Donate
 
 If you find this project useful a small donation is much appreciated (but by no means required or expected): https://ko-fi.com/jeroen94704

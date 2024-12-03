@@ -10,14 +10,14 @@ from generators.common.settings_form import get_standard_settings_form
 
 class Form(FlaskForm):
     id = "holeybin"
-    numHolesX      = IntegerField("# holes in width direction", widget=NumberInput(min = 1), default=2)
-    numHolesY      = IntegerField("# holes in length direction", widget=NumberInput(min = 1), default=2)
-    sizeUnitsX     = IntegerField("Width in grid-units", widget=NumberInput(min = 1, max = Grid.MAX_GRID_UNITS), default=2)
-    sizeUnitsY     = IntegerField("Length in grid-units", widget=NumberInput(min = 1, max = Grid.MAX_GRID_UNITS), default=2)
+    numHolesX      = IntegerField("# holes in width direction", widget=NumberInput(min = 1), default=3)
+    numHolesY      = IntegerField("# holes in length direction", widget=NumberInput(min = 1), default=3)
+    sizeUnitsX     = IntegerField("Width in grid-units", widget=NumberInput(min = 1, max = Grid.MAX_GRID_UNITS), default=1)
+    sizeUnitsY     = IntegerField("Length in grid-units", widget=NumberInput(min = 1, max = Grid.MAX_GRID_UNITS), default=1)
     holeDepth      = DecimalField("Depth", default = 5.0, places = 2)
     holeShape      = SelectField("Shape", choices=[(choice.name, choice.value) for choice in HoleShape])
     holeSize       = DecimalField("Size", default = 4.0, places = 2)
-    keepoutDiameter = DecimalField("Keepout diameter", default = 4.0, places = 2)
+    keepoutDiameter = DecimalField("Keepout diameter", default = 12.0, places = 2)
     addStackingLip  = BooleanField("Stacking lip", default="checked", false_values=(False, "false", ""))
     addMagnetHoles  = BooleanField("Magnet holes", default="true", false_values=(False, "false", ""))
     magnetHoleDiameter = DecimalField("Magnet-hole diameter", default = 6.5, places = 2)
@@ -47,8 +47,9 @@ class Form(FlaskForm):
         self.numHolesY.onChangedCallback = "onNumHolesChanged()"
         self.sizeUnitsX.onChangedCallback = "onBinSizeChanged()"
         self.sizeUnitsY.onChangedCallback = "onBinSizeChanged()"
-        self.keepoutDiameter.onChangedCallback = "onBinSizeChanged()"
-
+        self.keepoutDiameter.onChangedCallback = "onHoleSizeChanged()"
+        self.holeSize.onChangedCallback = "onHoleSizeChanged()"
+        
     def get_rows(self):
         return [
             ["Hole grid", [self.numHolesX, self.numHolesY, self.sizeUnitsX, self.sizeUnitsY, self.keepoutDiameter]],

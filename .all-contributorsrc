@@ -25,6 +25,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "chasebolt",
+      "name": "Chase Bolt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1222984?v=4",
+      "profile": "https://bluelight.co",
+      "contributions": [
+        "bug"
+      ]
     }
   ]
 }

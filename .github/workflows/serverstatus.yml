@@ -12,25 +12,6 @@ jobs:
     steps:
       - name: Health check
         uses: 102/website-healthcheck@v1.0.2        
-        continue-on-error: true
         with:
           web-url: https://gridfinity.bouwens.co
-      - name: Website available
-        if: ${{ success() }}
-        uses: RubbaBoy/BYOB@v1.3.0
-        with:
-          NAME: ServiceHealth
-          LABEL: 'gridfinity.bouwens.co'
-          STATUS: "Available"
-          COLOR: 00FF00
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Website unavailable
-        if: ${{ failure() }}
-        uses: RubbaBoy/BYOB@v1.3.0
-        with:
-          NAME: ServiceHealth
-          LABEL: 'gridfinity.bouwens.co'
-          STATUS: "Offline"
-          COLOR: FF0000
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           

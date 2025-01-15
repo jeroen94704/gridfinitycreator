@@ -1,0 +1,27 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: GridfinityCreator
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Jeroen
+    family-names: Bouwens
+repository-code: 'https://github.com/jeroen94704/gridfinitycreator/'
+url: 'https://gridfinity.bouwens.co/'
+abstract: >-
+  GridfinityCreator dynamically generates custom STL or STEP
+  files for several types of Gridfinity components. 
+keywords:
+  - gridfinity
+  - cadquery
+  - stl
+  - step
+  - 3dprinting
+license: CC-BY-NC-SA-4.0
+commit: 471f3bbbabadb084ef1bf07ec81898326b21c8a1
+version: 0.4.4
+date-released: '2024-12-03'

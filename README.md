@@ -1,5 +1,5 @@
 [![All Contributors](https://img.shields.io/github/all-contributors/jeroen94704/gridfinitycreator?color=ee8449&style=flat-square)](#contributors)
-![Server status](https://github.com/jeroen94704/gridfinitycreator/serverstatus)
+![Server status](https://img.shields.io/badge/gridfinity.bouwens.co-Online-green)
 
 # Gridfinity Creator
 

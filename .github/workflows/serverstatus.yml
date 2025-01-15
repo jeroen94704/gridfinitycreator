@@ -1,0 +1,25 @@
+name: "Check for website health"
+
+on:
+  schedule:
+    - cron: "*/12 * * * *"
+    
+jobs:
+  health_check_badge_job:
+    runs-on: ubuntu-latest
+    name: Check for status 200 and title text "Gridfinity Creator"
+    steps:
+      - name: Health check
+        id: check
+        uses: 102/website-healthcheck@v1.0.2        
+        continue-on-error: true
+        with:
+          web-url: https://gridfinity.bouwens.co
+      - name: Website status badge
+        if: ${{ success() }}
+        uses: RubbaBoy/BYOB@v1.3.0
+        with:
+          NAME: ServiceHealth
+          LABEL: 'gridfinity.bouwens.co'
+          STATUS: "Available"
+          COLOR: 00FF00

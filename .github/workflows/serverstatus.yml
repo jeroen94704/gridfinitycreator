@@ -23,6 +23,7 @@ jobs:
           LABEL: 'gridfinity.bouwens.co'
           STATUS: "Available"
           COLOR: 00FF00
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Website unavailable
         if: ${{ failure() }}
         uses: RubbaBoy/BYOB@v1.3.0
@@ -31,3 +32,5 @@ jobs:
           LABEL: 'gridfinity.bouwens.co'
           STATUS: "Offline"
           COLOR: FF0000
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          

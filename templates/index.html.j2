@@ -64,16 +64,17 @@
     </div>
     {% endfor %}
   </div>
-  
+
   {% include 'templates/settings_offcanvas.html' %}
 </div>
 
 <div class="row text-center pb-4">
   <div class="col fw-lighter fs-6 text-secondary">
     <p>Gridfinity Creator v{{version}}. &copy;2024 Jeroen Bouwens.</p>
-      <p><a class="fw-lighter" href="https://github.com/jeroen94704/gridfinitycreator">Source</a>. 
+    <p><a class="fw-lighter" href="https://github.com/jeroen94704/gridfinitycreator">Source</a>.
       <a href="https://discord.gg/fBb2gpzKca">Discord</a>.
-      <a href="https://ko-fi.com/jeroen94704">Donate</a>.</p>
+      <a href="https://ko-fi.com/jeroen94704">Donate</a>.
+    </p>
   </div>
 </div>
 
@@ -88,32 +89,30 @@
 </div>
 
 <script>
-    document.body.addEventListener('click', event => {
-      // Only respond to help buttons
-      if (!event.target.matches('.help-button')) {
-        return;
-      }
+  document.body.addEventListener('click', event => {
+    // Only respond to help buttons
+    if (!event.target.matches('.help-button')) {
+      return;
+    }
 
-      // Check if there is any content present inside the (hidden) content block
-      const sourceModalElement = document.getElementById('help-modal');
-      const sourceModal = bootstrap.Modal.getOrCreateInstance(sourceModalElement);
-      helpText = event.target.querySelector('[id^="content"]').innerHTML;
+    // Check if there is any content present inside the (hidden) content block
+    const sourceModalElement = document.getElementById('help-modal');
+    const sourceModal = bootstrap.Modal.getOrCreateInstance(sourceModalElement);
+    helpText = event.target.querySelector('[id^="content"]').innerHTML;
 
-      if(helpText === "")
-      {
-        helpText = "There is no extra information available for this field"
-      }
+    if (helpText === "") {
+      helpText = "There is no extra information available for this field"
+    }
 
-      sourceModalElement.querySelector('p').innerHTML = helpText
- 
-      sourceModal.show();
+    sourceModalElement.querySelector('p').innerHTML = helpText
+
+    sourceModal.show();
   }, false);
 
-  window.onload = function()
-  {
+  window.onload = function () {
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-  }  
+  }
 
   function presetChanged() {
     var presetName = document.getElementById("grid-presets").value;

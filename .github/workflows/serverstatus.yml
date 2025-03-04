@@ -2,7 +2,7 @@ name: "Check for website health"
 
 on:
   schedule:
-    - cron: "*/26 * * * *"
+    - cron: "26 23 * * *"
   workflow_dispatch:
     
 jobs:

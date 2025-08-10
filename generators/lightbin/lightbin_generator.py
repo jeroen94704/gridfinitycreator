@@ -144,7 +144,7 @@ class Generator:
         return result
     
     def label_tab(self, basePlane):
-        """Construct the pickip/label tab"""
+        """Construct the pickup/label tab"""
 
         result = basePlane
 
@@ -155,7 +155,6 @@ class Generator:
             basePlane.sketch()
             .segment((startX,self.brickSizeZ-labelRidgeHeight),(startX,self.brickSizeZ))
             .segment((startX+self.settings.labelRidgeWidth,self.brickSizeZ))
-            .segment((startX,self.brickSizeZ-self.settings.labelRidgeWidth))
             .close()
             .reset()
             .assemble()

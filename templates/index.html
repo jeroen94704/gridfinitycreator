@@ -49,7 +49,7 @@
         </div>
       </div>
       <div class="row p-3">
-        <div class="col">
+        <div class="col-md-6">
           <div class="card p-0">
             <div class="card-header text-white bg-primary">Settings</div>
             <div class="card-body">
@@ -57,6 +57,14 @@
                 {{ form.csrf_token() }}
                 {{ form.get_settings_html() | inner_render({"form":form}) }}
               </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card p-0">
+            <div class="card-header text-white bg-primary">3D Preview</div>
+            <div class="card-body p-0">
+              <div id="preview-{{form.id}}" style="width: 100%; height: 400px; position: relative;"></div>
             </div>
           </div>
         </div>
@@ -130,5 +138,44 @@
         break;
     }
   }
+  
+  // 3D Preview functionality
+  let viewers = {};
+  let activeViewerId = null;
+  
+  // Initialize viewer when tab is shown
+  document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(button => {
+    button.addEventListener('shown.bs.tab', function (event) {
+      const targetId = event.target.getAttribute('href').substring(1);
+      
+      // Skip if it's the home tab
+      if (targetId === 'home') return;
+      
+      const viewerContainerId = 'preview-' + targetId;
+      const viewerContainer = document.getElementById(viewerContainerId);
+      
+      if (viewerContainer && !viewers[targetId]) {
+        // Initialize the viewer for this generator
+        viewers[targetId] = initializeViewer(viewerContainerId);
+        setupFormListeners(targetId);
+        activeViewerId = targetId;
+      }
+    });
+  });
+  
+  // Check if any tab is already active on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    const activeTab = document.querySelector('.tab-pane.active');
+    if (activeTab && activeTab.id !== 'home') {
+      const viewerContainerId = 'preview-' + activeTab.id;
+      const viewerContainer = document.getElementById(viewerContainerId);
+      
+      if (viewerContainer) {
+        viewers[activeTab.id] = initializeViewer(viewerContainerId);
+        setupFormListeners(activeTab.id);
+        activeViewerId = activeTab.id;
+      }
+    }
+  });
 </script>
 {% endblock %}

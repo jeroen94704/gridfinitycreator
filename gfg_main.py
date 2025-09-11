@@ -7,13 +7,14 @@ import waitress
 
 from contextlib import contextmanager
 
-from flask import Flask, make_response, request
+from flask import Flask, make_response, request, jsonify
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Template
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import grid_constants
 from grid_constants import *
 from version import __version__
+from preview_generator import PreviewGenerator
 
 app = Flask(__name__)
 
@@ -113,6 +114,111 @@ def index_post():
     response.set_cookie('gridspec', str('{0},{1},{2}').format(constants.GRID_UNIT_SIZE_X_MM, constants.GRID_UNIT_SIZE_Y_MM, constants.HEIGHT_UNITSIZE_MM))
     return response
 
+# Handle preview requests
+@app.route('/preview', methods=['POST'])
+def preview():
+    """Generate a lightweight 3D preview for real-time visualization"""
+    try:
+        data = request.get_json()
+        logger.info(f"Preview request data: {data}")
+        
+        # Get grid constants
+        constants = grid_constants.Grid()
+        if 'gridSpec' in data:
+            constants.GRID_UNIT_SIZE_X_MM = float(data['gridSpec'].get('x', 42))
+            constants.GRID_UNIT_SIZE_Y_MM = float(data['gridSpec'].get('y', 42))
+            constants.HEIGHT_UNITSIZE_MM = float(data['gridSpec'].get('z', 7))
+            constants.recalculate()
+        
+        # Find the appropriate generator
+        generator_id = data.get('generator')
+        form_data = data.get('formData', {})
+        
+        logger.info(f"Looking for generator: {generator_id}")
+        logger.info(f"Available generators: {[gen.get_form().id for gen in generators]}")
+        
+        for gen in generators:
+            form = gen.get_form()
+            if form.id == generator_id:
+                try:
+                    # Import the specific generator and settings modules
+                    import sys
+                    import importlib
+                    
+                    # The generator modules are already loaded by the main app
+                    # We need to access the classes from the imported modules
+                    generator_module = gen
+                    
+                    # Import the generator and settings modules directly
+                    generator_spec = importlib.util.spec_from_loader(
+                        f'{generator_id}_generator',
+                        importlib.machinery.SourceFileLoader(
+                            f'{generator_id}_generator',
+                            f'./generators/{generator_id}/{generator_id}_generator.py'
+                        )
+                    )
+                    generator_module_obj = importlib.util.module_from_spec(generator_spec)
+                    generator_spec.loader.exec_module(generator_module_obj)
+                    
+                    settings_spec = importlib.util.spec_from_loader(
+                        f'{generator_id}_settings', 
+                        importlib.machinery.SourceFileLoader(
+                            f'{generator_id}_settings',
+                            f'./generators/{generator_id}/{generator_id}_settings.py'
+                        )
+                    )
+                    settings_module_obj = importlib.util.module_from_spec(settings_spec)
+                    settings_spec.loader.exec_module(settings_module_obj)
+                    
+                    # Get the classes
+                    generator_class = getattr(generator_module_obj, 'Generator')
+                    settings_class = getattr(settings_module_obj, 'Settings')
+                    
+                    # Create settings object with form data
+                    settings = settings_class()
+                    for key, value in form_data.items():
+                        if hasattr(settings, key):
+                            # Convert to appropriate type
+                            field_type = type(getattr(settings, key))
+                            if field_type == int:
+                                setattr(settings, key, int(value))
+                            elif field_type == float:
+                                setattr(settings, key, float(value))
+                            elif field_type == bool and isinstance(value, str):
+                                setattr(settings, key, value.lower() == 'true')
+                            else:
+                                setattr(settings, key, value)
+                    
+                    logger.info(f"Created settings: {settings}")
+                    
+                    # Generate the model
+                    generator_instance = generator_class(settings, constants)
+                    model = generator_instance.generate_model()
+                    
+                except Exception as e:
+                    logger.error(f"Error creating generator instance: {e}")
+                    import traceback
+                    logger.error(traceback.format_exc())
+                    continue
+                
+                # Generate preview STL
+                preview_data = PreviewGenerator.generate_stl_preview(model, simplify=True)
+                
+                if preview_data:
+                    return jsonify({
+                        'success': True,
+                        'data': preview_data,
+                        'type': 'stl'
+                    })
+                else:
+                    return jsonify({'success': False, 'error': 'Failed to generate preview'}), 500
+        
+        return jsonify({'success': False, 'error': 'Generator not found'}), 404
+        
+    except Exception as e:
+        logger.error(f"Preview generation error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 # From this StackOverflow answer: https://stackoverflow.com/a/41904558
 @contextmanager
 def add_to_path(p):
@@ -178,7 +284,7 @@ if __name__ == "__main__":
     root.addHandler(console)
 
     # Configure rotating file logger
-    fh = logging.handlers.RotatingFileHandler('/logs/access.log', maxBytes=1000000, backupCount=10)
+    fh = logging.handlers.RotatingFileHandler('logs/access.log', maxBytes=1000000, backupCount=10)
     fh.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s: %(message)s')
     fh.setFormatter(formatter)

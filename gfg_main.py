@@ -40,7 +40,7 @@ def render_index(form_list, constants, message):
     jinja_env = Environment(loader=FileSystemLoader(["./", os.path.realpath(__file__)]), undefined=StrictUndefined)
     jinja_env.filters["inner_render"] = inner_render
 
-    index_template = jinja_env.get_template("templates/index.html")
+    index_template = jinja_env.get_template("templates/index.html.j2")
     return index_template.render(version=__version__, forms=form_list, message=message, gridsize_x=constants.GRID_UNIT_SIZE_X_MM,
                             gridsize_y=constants.GRID_UNIT_SIZE_Y_MM, gridsize_z=constants.HEIGHT_UNITSIZE_MM)
 
@@ -144,16 +144,19 @@ def load_generators():
 
         # Temporarily expand the search path for modules, so the (sub-)modules needed
         # by each generator can be found
-        with add_to_path(location):
-            # importlib magic. Loads the module and makes it available to call
-            spec = importlib.util.spec_from_loader(
-                entry,
-                importlib.machinery.SourceFileLoader(entry, fname)
-            )
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            sys.modules[entry] = module
-            generators.append(module)
+        try:
+            with add_to_path(location):
+                # importlib magic. Loads the module and makes it available to call
+                spec = importlib.util.spec_from_loader(
+                    entry,
+                    importlib.machinery.SourceFileLoader(entry, fname)
+                )
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                sys.modules[entry] = module
+                generators.append(module)
+        except Exception as e:
+            logger.error(f"Failed to load generator {entry}: {e}")
 
     return generators
 
@@ -177,9 +180,14 @@ if __name__ == "__main__":
     console.addFilter(serverFilter())
     root.addHandler(console)
 
+    # Ensure log directory exists
+    log_dir = '/logs'
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
     # Configure rotating file logger
     fh = logging.handlers.RotatingFileHandler('/logs/access.log', maxBytes=1000000, backupCount=10)
-    fh.setLevel(logging.INFO)
+    fh.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s: %(message)s')
     fh.setFormatter(formatter)
     fh.addFilter(serverFilter())
@@ -187,7 +195,11 @@ if __name__ == "__main__":
 
     logger = logging.getLogger('GFG')
 
-    generators = load_generators()
+    try:
+        generators = load_generators()
+    except Exception as e:
+        logger.error(f"Failed to load generators: {e}")
+        exit(1)
 
     if debugMode:
         logger.info("Started in debug mode")

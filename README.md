@@ -56,6 +56,7 @@ I have no experience with other reverse proxy methods (Apache, nginx, Helm, etc)
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/NoSQLKnowHow"><img src="https://avatars.githubusercontent.com/u/2966377?v=4?s=100" width="100px;" alt="Kirk Kirkconnell"/><br /><sub><b>Kirk Kirkconnell</b></sub></a><br /><a href="#ideas-NoSQLKnowHow" title="Ideas, Planning, & Feedback">🤔</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/wug-ge"><img src="https://avatars.githubusercontent.com/u/75441883?v=4?s=100" width="100px;" alt="wug-ge"/><br /><sub><b>wug-ge</b></sub></a><br /><a href="#bug-wug-ge" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://bluelight.co"><img src="https://avatars.githubusercontent.com/u/1222984?v=4?s=100" width="100px;" alt="Chase Bolt"/><br /><sub><b>Chase Bolt</b></sub></a><br /><a href="#bug-chasebolt" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/dseifert"><img src="https://avatars.githubusercontent.com/u/94670?v=4?s=100" width="100px;" alt="Daniel Seifert"/><br /><sub><b>Daniel Seifert</b></sub></a><br /><a href="#bug-dseifert" title="Bug reports">🐛</a></td>
     </tr>
   </tbody>
 </table>

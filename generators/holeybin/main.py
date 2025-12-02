@@ -43,9 +43,13 @@ def process(form, constants):
     # Construct the names for the temporary and downloaded file
     filename = "/tmpfiles/" + str(uuid.uuid4()) + "." + form.exportFormat.data
 
+    logger.info(s)
+
     # Generate the STL file
     gen = generator.Generator(s, g)
     gen.generate_stl(filename)
+
+    logger.debug("Generating completed")
 
     # Delete the temp file after it was downloaded
     @after_this_request
@@ -56,7 +60,6 @@ def process(form, constants):
             print(ex)
         return response
 
-    logger.info(s)
 
     # Send the generated STL file to the client
     downloadName = "HoleyBin_{0}x{1}x{2}.{3}".format(s.numHolesX, s.numHolesY, s.holeDepth, form.exportFormat.data)

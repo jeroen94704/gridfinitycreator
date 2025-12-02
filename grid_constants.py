@@ -44,7 +44,7 @@ class Grid:
     HOLE_OFFSET_Y: float = BRICK_UNIT_SIZE_Y/2 - BASE_TOP_CHAMFER_SIZE - BASE_BOTTOM_CHAMFER_SIZE - 4.8
 
     # Some limits for sanity checking the inputs
-    MAX_COMPARTMENTS_PER_GRID_UNIT: float = 3
+    MAX_COMPARTMENTS_PER_GRID_UNIT: float = 4
     MAX_GRID_UNITS: float = 6
     MAX_HEIGHT_UNITS: float = 12
     MIN_HEIGHT_UNITS: float = 2 # A height of 1 unit would be just the base without anything on top

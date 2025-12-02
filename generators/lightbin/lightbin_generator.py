@@ -144,18 +144,20 @@ class Generator:
         return result
     
     def label_tab(self, basePlane):
-        """Construct the pickip/label tab"""
+        """Construct the pickup/label tab"""
 
         result = basePlane
 
         startX = self.grid.WALL_THICKNESS
+        
+        # Limit the height of the label ridge to avoid it being taller than the compartment
         labelRidgeHeight = min(self.compartmentSizeZ+2.25, self.settings.labelRidgeWidth-self.grid.CHAMFER_EPSILON)
 
+        # Create the label tab profile and extrude it
         result.add(
             basePlane.sketch()
             .segment((startX,self.brickSizeZ-labelRidgeHeight),(startX,self.brickSizeZ))
             .segment((startX+self.settings.labelRidgeWidth,self.brickSizeZ))
-            .segment((startX,self.brickSizeZ-self.settings.labelRidgeWidth))
             .close()
             .reset()
             .assemble()

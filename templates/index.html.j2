@@ -1,4 +1,4 @@
-{% extends 'templates/base.html' %}
+{% extends 'templates/base.html.j2' %}
 
 {% block content %}
 
@@ -33,7 +33,7 @@
     <div id="home" class="tab-pane active">
       <div class="row p-3">
         <div class="col">
-          {% include 'templates/front_page.html' %}
+          {% include 'templates/front_page.html.j2' %}
         </div>
       </div>
     </div>
@@ -65,7 +65,7 @@
     {% endfor %}
   </div>
 
-  {% include 'templates/settings_offcanvas.html' %}
+  {% include 'templates/settings_offcanvas.html.j2' %}
 </div>
 
 <div class="row text-center pb-4">
